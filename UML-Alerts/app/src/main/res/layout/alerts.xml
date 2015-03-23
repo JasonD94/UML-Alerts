@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/editText"
-        android:text="UML ALERTS"
+        android:text="ALERTS"
         android:password="false"
         android:phoneNumber="false"
         android:gravity="center_horizontal"
@@ -28,7 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/editText2"
-        android:text="This app allows you to alert friends and family should find yourself in a dangerous situation."
+        android:text="Use the buttons below to add new alerts, and to view current ones."
         android:background="#00000000"
         android:gravity="center"
         android:textStyle="italic"
@@ -40,7 +40,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ALERTS"
+        android:text="ADD NEW ALERT"
         android:id="@+id/button"
         android:textSize="25dp"
         android:layout_above="@+id/button2"
@@ -52,20 +52,8 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="CONTACTS"
+        android:text="VIEW ALERTS"
         android:id="@+id/button2"
-        android:textSize="25dp"
-        android:layout_above="@+id/button3"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="OTHER SETTINGS"
-        android:id="@+id/button3"
         android:textSize="25dp"
         android:layout_above="@+id/button4"
         android:layout_alignParentLeft="true"
@@ -84,18 +72,5 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/editText3"
-        android:text="Press on one of the below buttons to configure the app."
-        android:gravity="center"
-        android:background="#00000000"
-        android:textStyle="italic"
-        android:layout_above="@+id/button"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="41dp" />
 
 </RelativeLayout>
