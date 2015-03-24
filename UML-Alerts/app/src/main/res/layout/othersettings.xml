@@ -65,7 +65,7 @@
     <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="???????????"
+        android:text="this is blank"
         android:id="@+id/checkBox2"
         android:layout_below="@+id/checkBox"
         android:layout_alignParentLeft="true"
