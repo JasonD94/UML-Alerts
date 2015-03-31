@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE abiword PUBLIC "-//ABISOURCE//DTD AWML 1.0 Strict//EN" "http://www.abisource.com/awml.dtd">
+<abiword template="false" xmlns:ct="http://www.abisource.com/changetracking.dtd" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:math="http://www.w3.org/1998/Math/MathML" xid-max="37" xmlns:dc="http://purl.org/dc/elements/1.1/" fileformat="1.1" xmlns:svg="http://www.w3.org/2000/svg" xmlns:awml="http://www.abisource.com/awml.dtd" xmlns="http://www.abisource.com/awml.dtd" xmlns:xlink="http://www.w3.org/1999/xlink" version="3.0.0" xml:space="preserve" props="dom-dir:ltr; document-footnote-restart-section:0; document-endnote-type:numeric; document-endnote-place-enddoc:1; document-endnote-initial:1; lang:en-US; document-endnote-restart-section:0; document-footnote-restart-page:0; document-footnote-type:numeric; document-footnote-initial:1; document-endnote-place-endsection:0">
+<!-- ======================================================================== -->
+<!-- This file is an AbiWord document.                                        -->
+<!-- AbiWord is a free, Open Source word processor.                           -->
+<!-- More information about AbiWord is available at http://www.abisource.com/ -->
+<!-- You should not edit this file by hand.                                   -->
+<!-- ======================================================================== -->
+
+<metadata>
+<m key="abiword.generator">AbiWord</m>
+<m key="dc.format">application/x-abiword</m>
+</metadata>
+<rdf>
+</rdf>
+<styles>
+<s type="P" name="List Paragraph" basedon="_Normal" props="margin-left:36.000000pt"/>
+<s type="P" name="_Normal" basedon="Normal"/>
+<s type="P" name="Normal" basedon="Normal" followedby="Current Settings" props="lang:ar-SA; font-size:12.000000pt; font-family:Times New Roman"/>
+<s type="C" name="Default Paragraph Font" basedon="Normal"/>
+<s type="C" name="FollowedHyperlink" basedon="Default Paragraph Font" props="text-decoration:underline; color:800080"/>
+<s type="C" name="Hyperlink" basedon="Default Paragraph Font" props="text-decoration:underline; color:0000FF"/>
+<s type="P" name="No List" basedon="Normal"/>
+<s type="P" name="Normal Table" basedon="Normal"/>
+</styles>
+<lists>
+<l id="110" parentid="0" type="5" start-value="1" list-delim="%L." list-decimal="."/>
+<l id="131" parentid="0" type="6" start-value="0" list-delim="%L." list-decimal="."/>
+<l id="140" parentid="0" type="5" start-value="1" list-delim="%L." list-decimal="."/>
+</lists>
+<pagesize pagetype="Letter" orientation="portrait" width="8.500000" height="11.000000" units="in" page-scale="1.000000"/>
+<section xid="1" props="page-margin-right:0.500000in; column-line:off; page-margin-left:0.500000in; columns:1; page-margin-top:1.000000in; page-margin-bottom:1.000000in">
+<p xid="2"><c props="font-weight:bold">Project 1, due 3/26, 12:00pm</c></p>
+<p xid="3"><c></c></p>
+<p xid="4">Watch week 9 videos</p>
+<p xid="5">Create a Trello board with name “Project XXX”</p>
+<p level="1" listid="131" parentid="0" xid="6" props="text-indent:-18.000000pt; tabstops:0.750000in/0; field-font:NULL; margin-left:54.000000pt"><field level="1" listid="131" parentid="130" type="list_label" xid="7" props="text-indent:-18.000000pt; tabstops:0.750000in/0; field-font:NULL; margin-left:54.000000pt"></field><c level="1" listid="131" parentid="130" type="list_label" props="text-indent:-18.000000pt; tabstops:0.750000in/0; field-font:NULL; margin-left:54.000000pt">	Follow same instruction in submission.docx to make me (</c><a xlink:href="mailto:glchen.uml@gmail.com" xid="8"><c level="1" listid="131" parentid="130" type="list_label" props="text-indent:-18.000000pt; tabstops:0.750000in/0; field-font:NULL; margin-left:54.000000pt">glchen.uml@gmail.com</c></a><c level="1" listid="131" parentid="130" type="list_label" props="text-indent:-18.000000pt; tabstops:0.750000in/0; field-font:NULL; margin-left:54.000000pt">) as an “</c><c props="font-weight:bold">Admin</c>”</p>
+<p level="1" listid="131" parentid="0" xid="10" props="text-indent:-18.000000pt; tabstops:0.750000in/0; field-font:NULL; margin-left:54.000000pt"><field level="1" listid="131" parentid="130" type="list_label" xid="11" props="text-indent:-18.000000pt; tabstops:0.750000in/0; field-font:NULL; margin-left:54.000000pt"></field><c level="1" listid="131" parentid="130" type="list_label" props="text-indent:-18.000000pt; tabstops:0.750000in/0; field-font:NULL; margin-left:54.000000pt">	A team only needs one board</c></p>
+<p level="1" listid="131" parentid="0" xid="12" props="text-indent:-18.000000pt; tabstops:0.750000in/0; field-font:NULL; margin-left:54.000000pt"><field level="1" listid="131" parentid="130" type="list_label" xid="13" props="text-indent:-18.000000pt; tabstops:0.750000in/0; field-font:NULL; margin-left:54.000000pt"></field><c level="1" listid="131" parentid="130" type="list_label" props="text-indent:-18.000000pt; tabstops:0.750000in/0; field-font:NULL; margin-left:54.000000pt">	Create a short project name for XXX</c></p>
+<p xid="14"><bookmark type="start" name="_GoBack" xid="15"/><bookmark type="end" name="_GoBack" xid="16"/></p>
+<p xid="17"><c level="1" listid="131" parentid="130" type="list_label" props="text-indent:-18.000000pt; tabstops:0.750000in/0; field-font:NULL; margin-left:54.000000pt">Create a list named “Week 9 - Backlog” on this project board, and produce following documents and attach to this list.</c></p>
+<p level="0" listid="140" parentid="0" style="List Paragraph" xid="18" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" xid="19" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	User stories </c></p>
+<p level="0" listid="140" parentid="0" style="List Paragraph" xid="20" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" xid="21" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	System map</c></p>
+<p level="0" listid="140" parentid="0" style="List Paragraph" xid="22" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" xid="23" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	App flow</c></p>
+<p level="0" listid="140" parentid="0" style="List Paragraph" xid="24" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" xid="25" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	Data attributes</c></p>
+<p level="0" listid="140" parentid="0" style="List Paragraph" xid="26" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" xid="27" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	Screen requirements</c></p>
+<p level="0" listid="140" parentid="0" style="List Paragraph" xid="28" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" xid="29" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	UI sketches (this can be hand draw and take a picture of it)</c></p>
+<p level="0" listid="140" parentid="0" style="List Paragraph" xid="30" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" xid="31" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	Note: these docs can be simple as you may only have minimal features to be implemented for the week 1. You can also attach any other design document if you wish (such as UML diagram).</c></p>
+<p xid="32"><c level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></c></p>
+<p xid="33"><c level="0" listid="140" parentid="0" style="List Paragraph" type="list_label" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">Create another list named “Week 10” and list programming tasks to be done in week 10 (due 4/2).</c></p>
+<p level="0" listid="110" parentid="0" style="List Paragraph" xid="34" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"><field level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" xid="35" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></field><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt">	If a team project, assign tasks to individual members</c></p>
+<p xid="36"><c level="0" listid="110" parentid="0" style="List Paragraph" type="list_label" props="text-indent:-18.000000pt; field-font:NULL; margin-left:36.000000pt"></c></p>
+<p xid="37"></p>
+</section>
+</abiword>
