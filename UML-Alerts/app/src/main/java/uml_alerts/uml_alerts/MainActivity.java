@@ -3,16 +3,24 @@ package uml_alerts.uml_alerts;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+import android.telephony.SmsManager;
 
 
 public class MainActivity extends ActionBarActivity {
 
     Button alerts_button, contacts_button, other_button, about_button;
     int backButtonCount = 0;
+
+    Button sendBtn;
+    EditText phoneNumber;
+    EditText Message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,37 +57,39 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 setContentView(R.layout.about);
             }
-        });/*        alerts_button = (Button) findViewById(R.id.button);
-        alerts_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setContentView(R.layout.alerts);
-            }
         });
 
-        contacts_button = (Button) findViewById(R.id.button2);
-        contacts_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setContentView(R.layout.contacts);
+        // SMS stuff
+        sendBtn = (Button) findViewById(R.id.sendSMS);
+        phoneNumber = (EditText) findViewById(R.id.phoneNo);
+        Message = (EditText) findViewById(R.id.smsMsg);
+
+        sendBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                sendSMSMessage();
             }
         });
+    }
 
-       other_button = (Button) findViewById(R.id.button3);
-       other_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setContentView(R.layout.othersettings);
-            }
-        });
+    protected void sendSMSMessage() {
+        Log.i("Send SMS", "");
 
-        about_button = (Button) findViewById(R.id.button4);
-        about_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setContentView(R.layout.about);
-            }
-        });*/
+//        String phoneNo = phoneNumber.getText().toString();
+        String phoneNo = "9783974618";
+//        String message = Message.getText().toString();
+        String message = "Sup huy, I sent this from Android Studio.";
+
+        try {
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(phoneNo, null, message, null, null);
+            Toast.makeText(getApplicationContext(), "SMS sent.",
+                    Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(getApplicationContext(),
+                    "SMS failed, please try again.",
+                    Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
     }
 
     @Override
