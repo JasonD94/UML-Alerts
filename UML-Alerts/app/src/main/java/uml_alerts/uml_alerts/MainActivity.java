@@ -75,9 +75,9 @@ public class MainActivity extends ActionBarActivity {
         Log.i("Send SMS", "");
 
 //        String phoneNo = phoneNumber.getText().toString();
-        String phoneNo = "9783974618";
-//        String message = Message.getText().toString();
-        String message = "Sup huy, I sent this from Android Studio.";
+        String phoneNo = "5086872259";
+        String message = Message.getText().toString();
+//        String message = "Sup huy, I sent this from Android Studio.";
 
         try {
             SmsManager smsManager = SmsManager.getDefault();
