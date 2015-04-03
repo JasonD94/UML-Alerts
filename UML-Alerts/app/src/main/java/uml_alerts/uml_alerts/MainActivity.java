@@ -24,6 +24,12 @@ public class MainActivity extends ActionBarActivity {
     EditText phoneNumber;
     EditText Message;
 
+    // Menu items
+    private static final int MENU_ALERTS = Menu.FIRST;
+    private static final int MENU_CONTACTS = Menu.FIRST + 1;
+    private static final int MENU_OTHER = Menu.FIRST + 2;
+    private static final int MENU_ABOUT = Menu.FIRST + 3;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +59,7 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        // About button
         about_button = (Button) findViewById(R.id.button4);
         about_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,9 +125,19 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+//        getMenuInflater().inflate(R.menu.menu_main, menu);
+//        return true;
+        super.onCreateOptionsMenu(menu);
+
+        // Menu - need to make some icons!
+        menu.add(0, MENU_ALERTS, Menu.NONE, "Alerts"); //.setIcon(android.R.drawable.ic_dialog_alert);
+        menu.add(0, MENU_CONTACTS, Menu.NONE, "Contacts"); //.setIcon(android.R.drawable.ic_dialog_alert);
+        menu.add(0, MENU_OTHER, Menu.NONE, "Other Settings"); //.setIcon(android.R.drawable.ic_dialog_alert);
+        menu.add(0, MENU_ABOUT, Menu.NONE, "About"); //.setIcon(android.R.drawable.ic_dialog_alert);
         return true;
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -128,13 +145,39 @@ public class MainActivity extends ActionBarActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+//
+//        //noinspection SimplifiableIfStatement
+//        if (id == R.id.action_settings) {
+//            return true;
+//        }
+//
+//        return super.onOptionsItemSelected(item);
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+//        super.onOptionsItemSelected(item);
+
+        switch (id) {
+            case MENU_ALERTS:
+                //viewAbout();
+                doSomething();
+                break;
+            case MENU_CONTACTS:
+                //viewContacts();
+                doSomething();
+                break;
+            case MENU_OTHER:
+                //viewOtherSettings();
+                doSomething();
+                break;
+            case MENU_ABOUT:
+                //viewOtherSettings();
+                doSomething();
+                break;
         }
+        return false;
+    }
 
-        return super.onOptionsItemSelected(item);
+    public void doSomething() {
+        Toast.makeText(this, "Testing 1 2 3", Toast.LENGTH_SHORT).show();
     }
 
     public void viewAbout(View view) {
