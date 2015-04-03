@@ -24,18 +24,6 @@
         android:textSize="35dp"
         android:background="#00000000"/>
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/smsMsg"
-        android:text="Enter a message here"
-        android:background="#00000000"
-        android:gravity="center"
-        android:textStyle="italic"
-        android:layout_marginTop="68dp"
-        android:layout_below="@+id/editText"
-        android:layout_centerHorizontal="true" />
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -88,23 +76,32 @@
         android:layout_alignParentEnd="true"
         android:onClick="viewAbout"/>
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/phoneNo"
-        android:text="Enter a phone number here"
-        android:gravity="center"
-        android:background="#00000000"
-        android:textStyle="italic"
-        android:layout_below="@+id/smsMsg"
-        android:layout_centerHorizontal="true" />
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Send SMS"
         android:id="@+id/sendSMS"
-        android:layout_below="@+id/phoneNo"
+        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/sendMsg"
+        android:hint="Please enter your message here."
+        android:layout_above="@+id/sendSMS"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="23dp"
+        android:gravity="center_vertical|center"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="phone"
+        android:ems="10"
+        android:id="@+id/phoneNo"
+        android:hint="Please enter a phone number"
+        android:layout_above="@+id/sendMsg"
+        android:gravity="center_vertical|center"/>
 
 </RelativeLayout>

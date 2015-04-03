@@ -1,8 +1,11 @@
 package uml_alerts.uml_alerts;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -10,7 +13,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import android.telephony.SmsManager;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -62,7 +64,7 @@ public class MainActivity extends ActionBarActivity {
         // SMS stuff
         sendBtn = (Button) findViewById(R.id.sendSMS);
         phoneNumber = (EditText) findViewById(R.id.phoneNo);
-        Message = (EditText) findViewById(R.id.smsMsg);
+        Message = (EditText) findViewById(R.id.sendMsg);
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -72,24 +74,38 @@ public class MainActivity extends ActionBarActivity {
     }
 
     protected void sendSMSMessage() {
-        Log.i("Send SMS", "");
+        Log.i("Send SMS method", "");
 
-//        String phoneNo = phoneNumber.getText().toString();
-        String phoneNo = "5086872259";
-        String message = Message.getText().toString();
-//        String message = "Sup huy, I sent this from Android Studio.";
+        AlertDialog.Builder sms = new AlertDialog.Builder(this);
+        sms.setTitle("Send the message?");
+        sms.setMessage("Do you really want to send the SMS?");
+        sms.setIcon(android.R.drawable.ic_dialog_alert);
+        sms.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
-        try {
-            SmsManager smsManager = SmsManager.getDefault();
-            smsManager.sendTextMessage(phoneNo, null, message, null, null);
-            Toast.makeText(getApplicationContext(), "SMS sent.",
-                    Toast.LENGTH_LONG).show();
-        } catch (Exception e) {
-            Toast.makeText(getApplicationContext(),
-                    "SMS failed, please try again.",
-                    Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
+            public void onClick(DialogInterface dialog, int whichButton) {
+                Toast.makeText(MainActivity.this, "Sending SMS", Toast.LENGTH_SHORT).show();
+
+                String phoneNo = phoneNumber.getText().toString();
+                String message = Message.getText().toString();
+
+                try {
+                    SmsManager smsManager = SmsManager.getDefault();
+                    smsManager.sendTextMessage(phoneNo, null, message, null, null);
+                    Toast.makeText(getApplicationContext(), "SMS sent.",
+                            Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(),
+                            "SMS failed, please try again.",
+                            Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                }
+
+
+            }});
+        sms.setNegativeButton(android.R.string.no, null);
+
+        AlertDialog dialog = sms.create();
+        dialog.show();
     }
 
     @Override
