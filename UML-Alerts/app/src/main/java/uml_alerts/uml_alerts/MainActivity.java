@@ -44,6 +44,10 @@ public class MainActivity extends ActionBarActivity {
         });
     }
 
+    /**
+     *      Activity that sends an SMS message to a given phone number.
+     *      Needs to have a phone number & message set to be successful.
+     */
     protected void sendSMSMessage() {
         Log.i("Send SMS method", "");
 
@@ -86,6 +90,7 @@ public class MainActivity extends ActionBarActivity {
         backButtonCount = 0;
     }
 
+    // Adds options to the menu at the top of the app.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -102,7 +107,14 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
-
+    /**
+     *      Sets up the menu bar items.
+     *      Adds:
+     *      1) Alerts link
+     *      2) Contacts link
+     *      3) Other Settings link
+     *      4) About link
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -112,52 +124,54 @@ public class MainActivity extends ActionBarActivity {
 
         switch (id) {
             case MENU_ALERTS:
-                //viewAbout();
-                doSomething();
+                viewAlerts();
                 break;
             case MENU_CONTACTS:
-                //viewContacts();
-                doSomething();
+                viewContacts();
                 break;
             case MENU_OTHER:
-                //viewOtherSettings();
-                doSomething();
+                viewOtherSettings();
                 break;
             case MENU_ABOUT:
-                //viewOtherSettings();
-                doSomething();
+                viewAbout();
                 break;
         }
         return false;
     }
 
-    public void doSomething() {
-        Toast.makeText(this, "Testing 1 2 3", Toast.LENGTH_SHORT).show();
+    // Launches the About activity
+    public void viewAbout() {
+        backButtonCount = 0;
+        // Launches a new activity.
+        Intent myIntent = new Intent(MainActivity.this, About.class);
+        //myIntent.putExtra("key", value); //Optional parameters
+        MainActivity.this.startActivity(myIntent);
+    }
 
+    // Launches the Alerts activity
+    public void viewAlerts() {
         // Launches a new activity.
         Intent myIntent = new Intent(MainActivity.this, Alerts.class);
         //myIntent.putExtra("key", value); //Optional parameters
         MainActivity.this.startActivity(myIntent);
     }
 
-    public void viewAbout(View view) {
+    // Launches the Contacts activity
+    public void viewContacts() {
         backButtonCount = 0;
-        setContentView(R.layout.about);
+        // Launches a new activity.
+        Intent myIntent = new Intent(MainActivity.this, Contacts.class);
+        //myIntent.putExtra("key", value); //Optional parameters
+        MainActivity.this.startActivity(myIntent);
     }
 
-    public void viewAlerts(View view) {
+    // Launches the Other Settings activity
+    public void viewOtherSettings() {
         backButtonCount = 0;
-        setContentView(R.layout.alerts);
-    }
-
-    public void viewContacts(View view) {
-        backButtonCount = 0;
-        setContentView(R.layout.contacts);
-    }
-
-    public void viewOtherSettings(View view) {
-        backButtonCount = 0;
-        setContentView(R.layout.othersettings);
+        // Launches a new activity.
+        Intent myIntent = new Intent(MainActivity.this, OtherSettings.class);
+        //myIntent.putExtra("key", value); //Optional parameters
+        MainActivity.this.startActivity(myIntent);
     }
 
     /**
