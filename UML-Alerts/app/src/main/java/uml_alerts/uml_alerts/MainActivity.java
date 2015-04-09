@@ -16,10 +16,7 @@ import android.widget.Toast;
 
 
 public class MainActivity extends ActionBarActivity {
-
-    Button alerts_button, contacts_button, other_button, about_button;
     int backButtonCount = 0;
-
     Button sendBtn;
     EditText phoneNumber;
     EditText Message;
@@ -34,39 +31,6 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        alerts_button = (Button) findViewById(R.id.button);
-        alerts_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setContentView(R.layout.alerts);
-            }
-        });
-
-        contacts_button = (Button) findViewById(R.id.button2);
-        contacts_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setContentView(R.layout.contacts);
-            }
-        });
-
-       other_button = (Button) findViewById(R.id.button3);
-       other_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setContentView(R.layout.othersettings);
-            }
-        });
-
-        // About button
-        about_button = (Button) findViewById(R.id.button4);
-        about_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setContentView(R.layout.about);
-            }
-        });
 
         // SMS stuff
         sendBtn = (Button) findViewById(R.id.sendSMS);
@@ -124,10 +88,10 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
-//        return true;
         super.onCreateOptionsMenu(menu);
+
+        // Idea from:
+        // http://stackoverflow.com/questions/17311833/how-we-can-add-menu-item-dynamically
 
         // Menu - need to make some icons!
         menu.add(0, MENU_ALERTS, Menu.NONE, "Alerts"); //.setIcon(android.R.drawable.ic_dialog_alert);
@@ -145,15 +109,6 @@ public class MainActivity extends ActionBarActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-//
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-
-//        super.onOptionsItemSelected(item);
 
         switch (id) {
             case MENU_ALERTS:
@@ -178,6 +133,11 @@ public class MainActivity extends ActionBarActivity {
 
     public void doSomething() {
         Toast.makeText(this, "Testing 1 2 3", Toast.LENGTH_SHORT).show();
+
+        // Launches a new activity.
+        Intent myIntent = new Intent(MainActivity.this, Alerts.class);
+        //myIntent.putExtra("key", value); //Optional parameters
+        MainActivity.this.startActivity(myIntent);
     }
 
     public void viewAbout(View view) {
