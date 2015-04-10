@@ -45,7 +45,7 @@ public class Alerts extends ActionBarActivity {
     String mPhone = "";
 
     // Menu items
-    private static final int MENU_ALERTS = Menu.FIRST;
+    private static final int MENU_REFRESH = Menu.FIRST;
     private static final int MENU_CONTACTS = Menu.FIRST + 1;
     private static final int MENU_OTHER = Menu.FIRST + 2;
     private static final int MENU_ABOUT = Menu.FIRST + 3;
@@ -72,6 +72,7 @@ public class Alerts extends ActionBarActivity {
         });
     }
 
+
     public void createListView() {
         // Get the list view from the XML file.
         alert_list = (ListView) findViewById(R.id.listView);
@@ -92,9 +93,7 @@ public class Alerts extends ActionBarActivity {
     }
 
     public void updateListView() {
-        list.clear();
-        list = buildData();
-        list_adapter.notifyDataSetChanged();
+        createListView();
     }
 
 
@@ -102,16 +101,16 @@ public class Alerts extends ActionBarActivity {
         // This will at some point pull from the alerts_list map!
         // For now it is hard coded for testing purposes.
 
-        ArrayList<Map<String, String>> list = new ArrayList<>();
+        ArrayList<Map<String, String>> tmp_list = new ArrayList<>();
 
         for (Map.Entry<String, String> entry : alerts_list.entrySet()) {
-            list.add(putData(entry.getKey(), entry.getValue()));
+            tmp_list.add(putData(entry.getKey(), entry.getValue()));
         }
 
-        list.add(putData("603-999-9999", "Help! I've fallen and I can't get up!"));
-        list.add(putData("867-123-4567", "I'm being stalked! CALL THE POLICE!"));
-        list.add(putData("999-999-1234", "Hi I'm leaving for a trip."));
-        return list;
+        // These are defaults, just for testing!
+        tmp_list.add(putData("603-999-9999", "Help! I've fallen and I can't get up!"));
+        tmp_list.add(putData("867-123-4567", "I'm being stalked! CALL THE POLICE!"));
+        return tmp_list;
     }
 
 
@@ -155,6 +154,12 @@ public class Alerts extends ActionBarActivity {
                       public void onClick(DialogInterface dialog, int whichButton) {
                           mPhone = number_input.getText().toString();
                           mMessage = msg_input.getText().toString();
+
+                          // Add the phone number / message to the map of alerts.
+                          alerts_list.put(mPhone, mMessage);
+
+                          // Update the ListView.
+                          updateListView();
                       }
                   }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
@@ -162,13 +167,8 @@ public class Alerts extends ActionBarActivity {
             }
         });
 
+        // Display the dialog
         text_entry.show();
-
-        // Add the phone number / message to the map of alerts.
-        alerts_list.put(mPhone, mMessage);
-
-        // Update the ListView.
-        updateListView();
     }
 
 
@@ -187,7 +187,7 @@ public class Alerts extends ActionBarActivity {
         // http://stackoverflow.com/questions/17311833/how-we-can-add-menu-item-dynamically
 
         // Menu - need to make some icons!
-        menu.add(0, MENU_ALERTS, Menu.NONE, "Alerts"); //.setIcon(android.R.drawable.ic_dialog_alert);
+        menu.add(0, MENU_REFRESH, Menu.NONE, "Refresh alerts"); //.setIcon(android.R.drawable.ic_dialog_alert);
         menu.add(0, MENU_CONTACTS, Menu.NONE, "Contacts"); //.setIcon(android.R.drawable.ic_dialog_alert);
         menu.add(0, MENU_OTHER, Menu.NONE, "Other Settings"); //.setIcon(android.R.drawable.ic_dialog_alert);
         menu.add(0, MENU_ABOUT, Menu.NONE, "About"); //.setIcon(android.R.drawable.ic_dialog_alert);
@@ -210,8 +210,8 @@ public class Alerts extends ActionBarActivity {
         int id = item.getItemId();
 
         switch (id) {
-            case MENU_ALERTS:
-                viewAlerts();
+            case MENU_REFRESH:
+                viewRefresh();
                 break;
             case MENU_CONTACTS:
                 viewContacts();
@@ -235,13 +235,10 @@ public class Alerts extends ActionBarActivity {
         Alerts.this.startActivity(myIntent);
     }
 
-    // Launches the Alerts activity
-    public void viewAlerts() {
+    // Updates the ListView.
+    public void viewRefresh() {
 
-        // Launches a new activity.
-        Intent myIntent = new Intent(Alerts.this, Alerts.class);
-        //myIntent.putExtra("key", value); //Optional parameters
-        Alerts.this.startActivity(myIntent);
+        updateListView();
     }
 
     // Launches the Contacts activity
