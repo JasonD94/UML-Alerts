@@ -152,7 +152,6 @@ public class MainActivity extends ActionBarActivity {
     public void viewAlerts() {
         // Launches a new activity.
         Intent myIntent = new Intent(MainActivity.this, Alerts.class);
-        //myIntent.putExtra("key", value); //Optional parameters
         MainActivity.this.startActivity(myIntent);
     }
 

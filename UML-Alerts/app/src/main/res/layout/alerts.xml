@@ -6,7 +6,7 @@
     android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity"
     android:textAlignment="center">
 
-    <EditText
+    EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/editText"
@@ -24,36 +24,11 @@
         android:textSize="35dp"
         android:background="#00000000"/>
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/editText2"
-        android:text="Use the buttons below to add new alerts, and to view current ones."
-        android:background="#00000000"
-        android:gravity="center"
-        android:textStyle="italic"
-        android:layout_marginTop="44dp"
-        android:layout_below="@+id/editText"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="ADD NEW ALERT"
-        android:id="@+id/button"
-        android:textSize="25dp"
-        android:layout_above="@+id/button2"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="VIEW ALERTS"
-        android:id="@+id/button2"
+        android:id="@+id/AddAlertButton"
         android:textSize="25dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
@@ -68,6 +43,6 @@
         android:layout_above="@+id/button"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/editText2" />
+        android:layout_below="@+id/editText" />
 
 </RelativeLayout>
