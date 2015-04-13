@@ -44,32 +44,24 @@
         android:background="#00000000"
         android:gravity="left"
         android:textStyle="italic"
-        android:layout_marginTop="44dp"
+        android:layout_marginTop="38dp"
         android:layout_below="@+id/editText2"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_centerHorizontal="true" />
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/editText4"
         android:text="Jason Downing - Lead Android Dev"
         android:background="#00000000"
-        android:layout_marginTop="44dp"
-        android:layout_below="@+id/editText3"/>
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/editText5"
         android:text="Udit Bhansali - Android Dev"
         android:background="#00000000"
-        android:layout_marginTop="44dp"
-        android:layout_below="@+id/editText4"/>
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/editText6"
-        android:text="JT Shepple - UI and Graphics"
-        android:background="#00000000"
-        android:layout_marginTop="44dp"
-        android:layout_below="@+id/editText5"/>
+        android:layout_below="@+id/editText4"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="44dp" />
 </RelativeLayout>
