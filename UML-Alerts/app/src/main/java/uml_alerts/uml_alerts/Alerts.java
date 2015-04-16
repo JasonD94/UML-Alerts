@@ -16,12 +16,21 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class Alerts extends ActionBarActivity {
+
+    // Const file name for the CSV file.
+    private static final String CSV_FILE = "alerts.csv";
 
     // Map for the Alerts.
     // Key: Phone Number (in String form)
@@ -70,6 +79,30 @@ public class Alerts extends ActionBarActivity {
                 AddAlert();
             }
         });
+
+        // Open data from the CSV file
+        // ... stuff
+        String Key[] = {};
+        String Value[] = {};
+
+        try {
+            CSVReader reader = new CSVReader(new InputStreamReader(getAssets().open(CSV_FILE)));
+            while(true) {
+                Key = reader.readNext();
+                Value = reader.readNext();
+                if(Key != null && Value != null) {
+                    // Add the phone number / message to the map of alerts.
+                    alerts_list.put(Key.toString(), Value.toString());
+                } else {
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Now update the alerts view.
+        updateListView();
     }
 
 
@@ -180,6 +213,65 @@ public class Alerts extends ActionBarActivity {
 
 
     @Override
+    public void onPause() {
+        super.onPause();  // Always call the superclass method first
+
+//        List<String[]> data = new ArrayList<>();
+//        CSVWriter writer = null;
+//
+//        try {
+//            writer = new CSVWriter(new FileWriter(CSV_FILE), '\t');
+//            // Go through the alerts map and save the values to the CSV file.
+//            for (Map.Entry<String, String> entry : alerts_list.entrySet()) {
+//                data.add(new String[] {entry.getKey(), entry.getValue()});
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        if(writer != null) {
+//            writer.writeAll(data);
+//        }
+//
+//        // Try closing the csv file.
+//        try {
+//            writer.close();
+//        }
+//        catch(IOException e) {
+//            e.printStackTrace();
+//        }
+
+        try
+        {
+            File file = new File(CSV_FILE);
+
+            // creates the file of name data.csv
+            file.createNewFile();
+
+            //you can print absolute path of file
+            System.out.println(file.getAbsolutePath());
+
+            // creates a FileWriter Object
+            FileWriter csv = new FileWriter(file);
+
+            //pass to csv writer
+            CSVWriter writer = new CSVWriter(csv);
+
+            //Create record
+            String [] record = "hello,world".split(",");
+
+            //Write the record to file
+            writer.writeNext(record);
+
+            //close the writer
+            writer.close();
+
+        } catch (IOException e) {
+        }
+    }
+
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
@@ -259,3 +351,5 @@ public class Alerts extends ActionBarActivity {
         Alerts.this.startActivity(myIntent);
     }
 }
+
+
