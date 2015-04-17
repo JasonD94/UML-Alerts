@@ -1,8 +1,13 @@
 package uml_alerts.uml_alerts;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.telephony.SmsManager;
@@ -18,23 +23,28 @@ import android.widget.Toast;
  *
  * TODO:
  *
+ * I THINK I FIGURED THIS OUT BY USING A CSV FILE
  * 1. Figure out how to save data to internal memory.
  *    This includes saving an entire map to storage, so that we can
  *    save the user's phone number / message combinations. These are essentially their
  *    "alerts"
  *
+ * Still need to do this.
  * 2. Add onclick listeners to the listview items. Make it so if you click on one,
  *    it loads the "send SMS" dialog seen in the MainActivity. This should send the
  *    displayed message to the displayed phone number.
  *
+ * Still need to do this.
  * 3. Instead of having the user enter a phone number, allow them to look up a name in their
  *    address book. Access the contacts book, and let them start typing a name, and display
  *    possible matches. They should be able to press on a name, and have it load that contact's
  *    number into the map, along with whatever message they set.
  *
+ * Need to remove this.
  *  4. The contact's page would then be unnecessary. Remove it, plus the main activity.
  *     The user should then be sent directly the alerts page.
  *
+ *  THIS SHOULD BE DONE:
  *  5. Add a Google Map page instead to display the user's current location (if GPS is on),
  *     or an approximate location (if network location is on).
  *     Along with the Google Map page, allow user's to send their current location to their
@@ -57,6 +67,9 @@ import android.widget.Toast;
  *     http://stackoverflow.com/questions/2660201/what-parameters-should-i-use-in-a-google-maps-url-to-go-to-a-lat-lon
  *     For Google Maps URL details.
  *
+ *     http://maps.google.com/maps?z=1&h=m&q=loc:
+ *     42.654802, -71.326363
+ *
  *  6.
  *
  *
@@ -74,6 +87,9 @@ public class MainActivity extends ActionBarActivity {
     private static final int MENU_OTHER = Menu.FIRST + 2;
     private static final int MENU_ABOUT = Menu.FIRST + 3;
 
+    // Google Maps base URL
+    private static final String maps_URL = "http://maps.google.com/maps?z=1&h=m&q=loc:";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +105,29 @@ public class MainActivity extends ActionBarActivity {
                 sendSMSMessage();
             }
         });
+    }
+
+    // Location related functions
+    private final LocationListener locationListener = new LocationListener() {
+        public void onLocationChanged(Location location) {
+            updateWithNewLocation(location);
+
+        }
+        public void onProviderDisabled(String provider) {}
+        public void onProviderEnabled(String provider) {}
+        public void onStatusChanged(String provider, int status,
+                                    Bundle extras) {}
+    };
+
+    private void updateWithNewLocation(Location location)
+    {
+        String latLongString = "No location found";
+        if (location != null) {
+            double lat = location.getLatitude();
+            double lng = location.getLongitude();
+            latLongString = "Lat:" + lat + "\nLong:" + lng;
+        }
+        Log.v("UML ALERTS", latLongString);
     }
 
     /**
@@ -109,6 +148,45 @@ public class MainActivity extends ActionBarActivity {
 
                 String phoneNo = phoneNumber.getText().toString();
                 String message = Message.getText().toString();
+
+                // Append a google maps URL to the message with a set location (for now)
+                // Pre-set to Olsen Hall, or 42.654802, -71.326363
+                double longitude = 42.654802;
+                double latitude = -71.326363;
+
+                // Get location - simplest way, all we want is lat and long!
+                LocationManager locationManager;
+                String svcName = Context.LOCATION_SERVICE;
+                locationManager = (LocationManager)getSystemService(svcName);
+
+                Criteria criteria = new Criteria();
+                criteria.setAccuracy(Criteria.ACCURACY_FINE);
+                criteria.setAltitudeRequired(false);
+                criteria.setBearingRequired(false);
+                criteria.setSpeedRequired(false);
+                criteria.setCostAllowed(true);
+                //String provider = locationManager.getBestProvider(criteria, true);
+
+                Location location = locationManager.getLastKnownLocation(locationManager.NETWORK_PROVIDER);
+//                Location location = locationManager.getLastKnownLocation(provider);
+
+                updateWithNewLocation(location);
+//
+//                locationManager.requestLocationUpdates(provider, 2000, 10, locationListener);
+
+                try {
+                    latitude = location.getLatitude ();
+                    longitude = location.getLongitude ();
+                }
+                catch (NullPointerException e){
+                    Log.v("UML ALERTS", "Couldn't get location. :(", e);
+                }
+
+                // Message for the user explaining why there's a google maps URL at the bottom.
+                String location_msg = "\nMy current location is: ";
+
+                String maps = maps_URL + Double.toString(latitude) + "," + Double.toString(longitude);
+                message += location_msg + maps;
 
                 try {
                     SmsManager smsManager = SmsManager.getDefault();

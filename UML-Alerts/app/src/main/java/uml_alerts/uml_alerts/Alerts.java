@@ -107,7 +107,7 @@ public class Alerts extends ActionBarActivity {
         String line[];
 
         // Build an instance of the CSVReader class. Give it the CSV file's name.
-        CSVReader reader = new CSVReader(new FileReader(csv_path), ',' , '"' , 1);
+        CSVReader reader = new CSVReader(new FileReader(csv_path));
 
         // Read all the data off the CSV file.
         line = reader.readNext();
