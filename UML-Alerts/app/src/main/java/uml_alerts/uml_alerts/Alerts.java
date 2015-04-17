@@ -19,10 +19,8 @@ import android.widget.SimpleAdapter;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
-import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +29,9 @@ public class Alerts extends ActionBarActivity {
 
     // Const file name for the CSV file.
     private static final String CSV_FILE = "alerts.csv";
+
+    // App Log Tag.
+    private static final String APP_TAG = "UML ALERTS";
 
     // Map for the Alerts.
     // Key: Phone Number (in String form)
@@ -64,6 +65,9 @@ public class Alerts extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.alerts);
 
+        // Logcat, one for every function / method.
+        Log.v(APP_TAG, "Starting onCreate()...");
+
         // ******************************************
         //  Below this is the code for the ListView.
         // ******************************************
@@ -80,25 +84,46 @@ public class Alerts extends ActionBarActivity {
             }
         });
 
-        // Open data from the CSV file
-        // ... stuff
-        String Key[] = {};
-        String Value[] = {};
+        try{
+            // Try and open / read from the CSV file.
+            OpenCSV();
+        } catch(Exception e) {
+            // Do stuff with the exception.
+            Log.v(APP_TAG, "Couldn't open CSV file!", e);
+        }
+    }
 
-        try {
-            CSVReader reader = new CSVReader(new InputStreamReader(getAssets().open(CSV_FILE)));
-            while(true) {
-                Key = reader.readNext();
-                Value = reader.readNext();
-                if(Key != null && Value != null) {
-                    // Add the phone number / message to the map of alerts.
-                    alerts_list.put(Key.toString(), Value.toString());
-                } else {
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    // Open data from a CSV file, save to the map.
+    public void OpenCSV() throws Exception {
+        // Opening CSV file log.
+        Log.v(APP_TAG, "Starting OpenCSV()...");
+
+        // Get path for storing / accessing the CSV file.
+        String csv_path = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + CSV_FILE;
+
+        // Open data from the CSV file
+        String Key[];
+        String Value[];
+
+        // Build an instance of the CSVReader class. Give it the CSV file's name.
+        CSVReader reader = new CSVReader(new FileReader(csv_path), ',' , '"' , 1);
+
+        // Read all the data off the CSV file.
+        Key = reader.readNext();
+        Value = reader.readNext();
+
+        while(Key != null && Value != null) {
+            Log.v(APP_TAG, "Key is: ");
+            Log.v(APP_TAG, Key.toString());
+
+            Log.v(APP_TAG, "Value is: ");
+            Log.v(APP_TAG, Value.toString());
+
+            // Add to the map.
+            alerts_list.put(Key.toString(), Value.toString());
+
+            Key = reader.readNext();
+            Value = reader.readNext();
         }
 
         // Now update the alerts view.
@@ -107,6 +132,8 @@ public class Alerts extends ActionBarActivity {
 
 
     public void createListView() {
+        Log.v("createListView", "Starting createListView()...");
+
         // Get the list view from the XML file.
         alert_list = (ListView) findViewById(R.id.listView);
 
@@ -126,6 +153,7 @@ public class Alerts extends ActionBarActivity {
     }
 
     public void updateListView() {
+        Log.v(APP_TAG, "Starting updateListView()...");
         createListView();
     }
 
@@ -133,6 +161,7 @@ public class Alerts extends ActionBarActivity {
     private ArrayList<Map<String, String>> buildData() {
         // This will at some point pull from the alerts_list map!
         // For now it is hard coded for testing purposes.
+        Log.v(APP_TAG, "Starting buildData()...");
 
         ArrayList<Map<String, String>> tmp_list = new ArrayList<>();
 
@@ -148,6 +177,8 @@ public class Alerts extends ActionBarActivity {
 
 
     private HashMap<String, String> putData(String phone_number, String alert) {
+        Log.v(APP_TAG, "Starting putData()...");
+
         HashMap<String, String> item = new HashMap<>();
         item.put("phone_number", phone_number);
         item.put("alert", alert);
@@ -156,8 +187,7 @@ public class Alerts extends ActionBarActivity {
 
 
     public void AddAlert() {
-        Log.i("Adding alert...", "");
-
+        Log.i(APP_TAG, "Starting AddAlert()...");
 
         // Text entry dialog.
         AlertDialog.Builder text_entry = new AlertDialog.Builder(this);
@@ -209,6 +239,15 @@ public class Alerts extends ActionBarActivity {
     public void onResume() {
         super.onResume();  // Always call the superclass method first
 
+        Log.v(APP_TAG, "Starting onResume()...");
+
+        try{
+            // Try and open / read from the CSV file.
+            OpenCSV();
+        } catch(Exception e) {
+            // Do stuff with the exception.
+            Log.v(APP_TAG, "Couldn't open CSV file!", e);
+        }
     }
 
 
@@ -216,64 +255,105 @@ public class Alerts extends ActionBarActivity {
     public void onPause() {
         super.onPause();  // Always call the superclass method first
 
-//        List<String[]> data = new ArrayList<>();
-//        CSVWriter writer = null;
-//
-//        try {
-//            writer = new CSVWriter(new FileWriter(CSV_FILE), '\t');
-//            // Go through the alerts map and save the values to the CSV file.
-//            for (Map.Entry<String, String> entry : alerts_list.entrySet()) {
-//                data.add(new String[] {entry.getKey(), entry.getValue()});
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        if(writer != null) {
-//            writer.writeAll(data);
-//        }
-//
-//        // Try closing the csv file.
-//        try {
-//            writer.close();
-//        }
-//        catch(IOException e) {
-//            e.printStackTrace();
-//        }
+        Log.v(APP_TAG, "Starting onPause()...");
 
-        try
-        {
-            File file = new File(CSV_FILE);
-
-            // creates the file of name data.csv
-            file.createNewFile();
-
-            //you can print absolute path of file
-            System.out.println(file.getAbsolutePath());
-
-            // creates a FileWriter Object
-            FileWriter csv = new FileWriter(file);
-
-            //pass to csv writer
-            CSVWriter writer = new CSVWriter(csv);
-
-            //Create record
-            String [] record = "hello,world".split(",");
-
-            //Write the record to file
-            writer.writeNext(record);
-
-            //close the writer
-            writer.close();
-
-        } catch (IOException e) {
+        // Call the SaveCSV function to save the map data to a CSV file.
+        try {
+            SaveCSV();
+        } catch(Exception e) {
+            // Write exception to logcat.
+            Log.v(APP_TAG, "Error! Couldn't save file to CSV!", e);
         }
+
+////        List<String[]> data = new ArrayList<>();
+////        CSVWriter writer = null;
+////
+////        try {
+////            writer = new CSVWriter(new FileWriter(CSV_FILE), '\t');
+////            // Go through the alerts map and save the values to the CSV file.
+////            for (Map.Entry<String, String> entry : alerts_list.entrySet()) {
+////                data.add(new String[] {entry.getKey(), entry.getValue()});
+////            }
+////        } catch (IOException e) {
+////            e.printStackTrace();
+////        }
+////
+////        if(writer != null) {
+////            writer.writeAll(data);
+////        }
+////
+////        // Try closing the csv file.
+////        try {
+////            writer.close();
+////        }
+////        catch(IOException e) {
+////            e.printStackTrace();
+////        }
+//
+//        try
+//        {
+//            File file = new File(CSV_FILE);
+//
+//            // creates the file of name data.csv
+//            file.createNewFile();
+//
+//            //you can print absolute path of file
+//            System.out.println(file.getAbsolutePath());
+//
+//            // creates a FileWriter Object
+//            FileWriter csv = new FileWriter(file);
+//
+//            //pass to csv writer
+//            CSVWriter writer = new CSVWriter(csv);
+//
+//            //Create record
+//            String [] record = "hello,world".split(",");
+//
+//            //Write the record to file
+//            writer.writeNext(record);
+//
+//            //close the writer
+//            writer.close();
+//
+//        } catch (IOException e) {
+//        }
+    }
+
+    public void SaveCSV() throws Exception {
+        // Opening CSV file log.
+        Log.v(APP_TAG, "Starting SaveCSV()...");
+
+        // Get path for storing / accessing the CSV file.
+        String csv_path = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + CSV_FILE;
+
+        // Create an instance of the CSVWriter class. Give it the CSV file's name.
+        CSVWriter writer = new CSVWriter(new FileWriter(csv_path));
+
+        // Try saving just one thing for the time being. A simple # and Msg.
+        String[] alert = "6034930229,Please help I'm being stalked by an angry man!".split(",");
+
+        // While we've got a valid thing in the map.
+        for(Map.Entry<String, String> entry : alerts_list.entrySet()) {
+            // Now pair will have a key / value that we can save.
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            String[] cur_alert = key + "," + value;
+        }
+
+        // Write to file.
+        writer.writeNext(alert);
+
+        // Close the writer.
+        writer.close();
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
+
+        Log.v(APP_TAG, "Starting onCreateOptionsMenu()...");
 
         // Idea from:
         // http://stackoverflow.com/questions/17311833/how-we-can-add-menu-item-dynamically
@@ -296,6 +376,8 @@ public class Alerts extends ActionBarActivity {
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.v(APP_TAG, "Starting onOptionsItemSelected()...");
+
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -320,6 +402,7 @@ public class Alerts extends ActionBarActivity {
 
     // Launches the About activity
     public void viewAbout() {
+        Log.v(APP_TAG, "Starting viewAbout()...");
 
         // Launches a new activity.
         Intent myIntent = new Intent(Alerts.this, About.class);
@@ -329,12 +412,14 @@ public class Alerts extends ActionBarActivity {
 
     // Updates the ListView.
     public void viewRefresh() {
+        Log.v(APP_TAG, "Starting viewRefresh()...");
 
         updateListView();
     }
 
     // Launches the Contacts activity
     public void viewContacts() {
+        Log.v(APP_TAG, "Starting viewContacts()...");
 
         // Launches a new activity.
         Intent myIntent = new Intent(Alerts.this, Contacts.class);
@@ -344,6 +429,7 @@ public class Alerts extends ActionBarActivity {
 
     // Launches the Other Settings activity
     public void viewOtherSettings() {
+        Log.v(APP_TAG, "Starting viewOtherSettings()...");
 
         // Launches a new activity.
         Intent myIntent = new Intent(Alerts.this, OtherSettings.class);
