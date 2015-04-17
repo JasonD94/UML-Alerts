@@ -22,7 +22,9 @@ import com.opencsv.CSVWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Alerts extends ActionBarActivity {
@@ -102,28 +104,34 @@ public class Alerts extends ActionBarActivity {
         String csv_path = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + CSV_FILE;
 
         // Open data from the CSV file
-        String Key[];
-        String Value[];
+        String line[];
 
         // Build an instance of the CSVReader class. Give it the CSV file's name.
         CSVReader reader = new CSVReader(new FileReader(csv_path), ',' , '"' , 1);
 
         // Read all the data off the CSV file.
-        Key = reader.readNext();
-        Value = reader.readNext();
+        line = reader.readNext();
 
-        while(Key != null && Value != null) {
+        while(line != null) {
+            // This gets the line and splits it based on the comma.
+            List<String> container = Arrays.asList(line);
+
+            // This gets the key / value from the List container.
+            String key = container.get(0);
+            String value = container.get(1);
+
+            // Debugging
             Log.v(APP_TAG, "Key is: ");
-            Log.v(APP_TAG, Key.toString());
+            Log.v(APP_TAG, key);
 
             Log.v(APP_TAG, "Value is: ");
-            Log.v(APP_TAG, Value.toString());
+            Log.v(APP_TAG, value);
 
             // Add to the map.
-            alerts_list.put(Key.toString(), Value.toString());
+            alerts_list.put(key, value);
 
-            Key = reader.readNext();
-            Value = reader.readNext();
+            // Get the next line.
+            line = reader.readNext();
         }
 
         // Now update the alerts view.
@@ -170,8 +178,8 @@ public class Alerts extends ActionBarActivity {
         }
 
         // These are defaults, just for testing!
-        tmp_list.add(putData("603-999-9999", "Help! I've fallen and I can't get up!"));
-        tmp_list.add(putData("867-123-4567", "I'm being stalked! CALL THE POLICE!"));
+//        tmp_list.add(putData("603-999-9999", "Help! I've fallen and I can't get up!"));
+//        tmp_list.add(putData("867-123-4567", "I'm being stalked! CALL THE POLICE!"));
         return tmp_list;
     }
 
@@ -264,59 +272,6 @@ public class Alerts extends ActionBarActivity {
             // Write exception to logcat.
             Log.v(APP_TAG, "Error! Couldn't save file to CSV!", e);
         }
-
-////        List<String[]> data = new ArrayList<>();
-////        CSVWriter writer = null;
-////
-////        try {
-////            writer = new CSVWriter(new FileWriter(CSV_FILE), '\t');
-////            // Go through the alerts map and save the values to the CSV file.
-////            for (Map.Entry<String, String> entry : alerts_list.entrySet()) {
-////                data.add(new String[] {entry.getKey(), entry.getValue()});
-////            }
-////        } catch (IOException e) {
-////            e.printStackTrace();
-////        }
-////
-////        if(writer != null) {
-////            writer.writeAll(data);
-////        }
-////
-////        // Try closing the csv file.
-////        try {
-////            writer.close();
-////        }
-////        catch(IOException e) {
-////            e.printStackTrace();
-////        }
-//
-//        try
-//        {
-//            File file = new File(CSV_FILE);
-//
-//            // creates the file of name data.csv
-//            file.createNewFile();
-//
-//            //you can print absolute path of file
-//            System.out.println(file.getAbsolutePath());
-//
-//            // creates a FileWriter Object
-//            FileWriter csv = new FileWriter(file);
-//
-//            //pass to csv writer
-//            CSVWriter writer = new CSVWriter(csv);
-//
-//            //Create record
-//            String [] record = "hello,world".split(",");
-//
-//            //Write the record to file
-//            writer.writeNext(record);
-//
-//            //close the writer
-//            writer.close();
-//
-//        } catch (IOException e) {
-//        }
     }
 
     public void SaveCSV() throws Exception {
@@ -330,19 +285,21 @@ public class Alerts extends ActionBarActivity {
         CSVWriter writer = new CSVWriter(new FileWriter(csv_path));
 
         // Try saving just one thing for the time being. A simple # and Msg.
-        String[] alert = "6034930229,Please help I'm being stalked by an angry man!".split(",");
+//        String[] alert = "6034930229,Please help I'm being stalked by an angry man!".split(",");
 
         // While we've got a valid thing in the map.
         for(Map.Entry<String, String> entry : alerts_list.entrySet()) {
             // Now pair will have a key / value that we can save.
             String key = entry.getKey();
             String value = entry.getValue();
+            String next = key + "," + value;
 
-            String[] cur_alert = key + "," + value;
+            String[] cur_alert = next.split(",");
+            writer.writeNext(cur_alert);
         }
 
-        // Write to file.
-        writer.writeNext(alert);
+//        // Write the testing alert to file.
+//        writer.writeNext(alert);
 
         // Close the writer.
         writer.close();
