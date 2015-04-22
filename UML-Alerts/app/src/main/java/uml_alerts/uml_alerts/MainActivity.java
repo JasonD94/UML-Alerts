@@ -2,14 +2,17 @@ package uml_alerts.uml_alerts;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
@@ -37,7 +40,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -128,8 +134,16 @@ public class MainActivity extends ActionBarActivity
     // Value: Message
     Map<String, String> alerts_list = new HashMap<>();
 
-    // ListView to display the map data.
+    // Map for the contacts
+    // Key: Name
+    // Value: Phone Number
+    ArrayList<HashMap<String,String>> contactData;
+
+    // ListView to display the alerts.
     ListView alert_list;
+
+    // ListView to display the contacts
+    ListView contacts_list;
 
     // Adapter for the ListView.
     SimpleAdapter list_adapter;
@@ -189,11 +203,34 @@ public class MainActivity extends ActionBarActivity
     }
 
 
+    /*
+     * Paramterized method to sort Map e.g. HashMap or Hashtable in Java
+     * throw NullPointerException if Map contains null key
+     */
+    public static <K extends Comparable,V extends Comparable> Map<K,V> sortByKeys(Map<K,V> map){
+        List<K> keys = new LinkedList<K>(map.keySet());
+        Collections.sort(keys);
+
+        //LinkedHashMap will keep the keys in the order they are inserted
+        //which is currently sorted on natural ordering
+        Map<K,V> sortedMap = new LinkedHashMap<K,V>();
+        for(K key: keys){
+            sortedMap.put(key, map.get(key));
+        }
+
+        return sortedMap;
+    }
+
+
+
     public void createListView() {
         Log.v("createListView", "Starting createListView()...");
 
         // Get the list view from the XML file.
         alert_list = (ListView) findViewById(R.id.listView);
+
+        // Sort the alerts.
+        alerts_list = sortByKeys(alerts_list);
 
         // Create a list of two items.
         // One is the user's phone number.
@@ -299,6 +336,8 @@ public class MainActivity extends ActionBarActivity
 
         Log.v(APP_TAG, "Starting onResume()...");
 
+        getContacts();
+
         try{
             // Try and open / read from the CSV file.
             OpenCSV();
@@ -377,6 +416,9 @@ public class MainActivity extends ActionBarActivity
         // ******************************************
         createListView();
 
+        // Get the contact data into the ArrayList.
+        getContacts();
+
         // ********************************
         //  Below this is the button code.
         // ********************************
@@ -410,12 +452,62 @@ public class MainActivity extends ActionBarActivity
 
     // Adds all the alerts to the list view.
     private void createAlerts() {
-
+        createListView();
     }
 
     // Adds all the user's contacts to the list view.
     private void createContacts() {
+        Log.v("createContacts", "Starting createContacts()...");
 
+        // Get the list view from the XML file.
+        contacts_list = (ListView) findViewById(R.id.listView);
+
+        // From is a list of Key's.
+        // to is an array of IDs for the strings.
+        String[] from = { "name", "number" };
+        int[] to = { android.R.id.text1, android.R.id.text2 };
+
+
+
+        // Simple adapter is all we need for this.
+        list_adapter = new SimpleAdapter(this, contactData, android.R.layout.simple_list_item_2, from, to);
+        alert_list.setAdapter(list_adapter);
+    }
+
+    // Pulls data from the user's contacts book into the contacts map.
+    public void getContacts() {
+        Log.v("getContacts()", "Starting getContacts()...");
+
+        // This code is for displaying contacts.
+        // We should in fact search through contacts and save their number in the map instead.
+        // May need to make an array of numbers though if more than one.
+        // For now deal with just SMS messages so just one number per alert.
+
+        contactData = new ArrayList<>();
+        ContentResolver cr = getContentResolver();
+        Cursor cursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,null, null, null, null);
+        while (cursor.moveToNext()) {
+            try{
+                String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                String hasPhone = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER));
+                if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
+                    Cursor phones = getContentResolver().query( ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID +" = "+ contactId, null, null);
+                    while (phones.moveToNext()) {
+                        String phoneNumber = phones.getString(phones.getColumnIndex( ContactsContract.CommonDataKinds.Phone.NUMBER));
+                        HashMap<String,String> map=new HashMap<>();
+                        map.put("name", name);
+                        map.put("number", phoneNumber);
+                        contactData.add(map);
+                    }
+                    phones.close();
+                }
+            }
+            catch(Exception e){
+
+            }
+        }
     }
 
     @Override
@@ -430,13 +522,19 @@ public class MainActivity extends ActionBarActivity
     public void onSectionAttached(int number) {
         switch (number) {
             case 1:
+                // This sets up the alerts view.
                 mTitle = getString(R.string.title_section1);
+                createAlerts();
                 break;
             case 2:
+                // This sets up the contacts view.
                 mTitle = getString(R.string.title_section2);
+                createContacts();
                 break;
             case 3:
+                // This should load the about page.
                 mTitle = getString(R.string.title_section3);
+                viewAbout();
                 break;
         }
     }
@@ -630,31 +728,10 @@ public class MainActivity extends ActionBarActivity
 
     // Launches the About activity
     public void viewAbout() {
+        Log.v(APP_TAG, "Starting viewAbout()...");
+
         // Launches a new activity.
         Intent myIntent = new Intent(MainActivity.this, About.class);
-        //myIntent.putExtra("key", value); //Optional parameters
-        MainActivity.this.startActivity(myIntent);
-    }
-
-    // Launches the Alerts activity
-    public void viewAlerts() {
-        // Launches a new activity.
-        Intent myIntent = new Intent(MainActivity.this, Alerts.class);
-        MainActivity.this.startActivity(myIntent);
-    }
-
-    // Launches the Contacts activity
-    public void viewContacts() {
-        // Launches a new activity.
-        Intent myIntent = new Intent(MainActivity.this, Contacts.class);
-        //myIntent.putExtra("key", value); //Optional parameters
-        MainActivity.this.startActivity(myIntent);
-    }
-
-    // Launches the Other Settings activity
-    public void viewOtherSettings() {
-        // Launches a new activity.
-        Intent myIntent = new Intent(MainActivity.this, OtherSettings.class);
         //myIntent.putExtra("key", value); //Optional parameters
         MainActivity.this.startActivity(myIntent);
     }
