@@ -26,12 +26,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
+
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
@@ -229,6 +232,23 @@ public class MainActivity extends ActionBarActivity
 
         // Get the list view from the XML file.
         alert_list = (ListView) findViewById(R.id.listView);
+
+        alert_list.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+            {
+                Object obj = (alert_list.getItemAtPosition(position));
+
+
+                //Object obj = parent.getItemAtPosition(position);
+                HashMap<String, String> item = (HashMap<String, String>)obj;
+                String phoneNumber = "TEST";
+                String alert = "ALERT";
+
+                phoneNumber = item.get("phone_number");
+                alert = item.get("alert");
+
+                Toast.makeText(MainActivity.this, "Number is: " + phoneNumber + "\nAlert is: " + alert, Toast.LENGTH_LONG).show();
+            }});
 
         // Sort the alerts.
         alerts_list = sortByKeys(alerts_list);
