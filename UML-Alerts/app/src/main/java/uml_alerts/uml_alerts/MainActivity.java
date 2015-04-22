@@ -41,6 +41,7 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -467,7 +468,8 @@ public class MainActivity extends ActionBarActivity
         String[] from = { "name", "number" };
         int[] to = { android.R.id.text1, android.R.id.text2 };
 
-
+        // Sort the contacts in order.
+        Collections.sort(contactData, new MapComparator("name"));
 
         // Simple adapter is all we need for this.
         list_adapter = new SimpleAdapter(this, contactData, android.R.layout.simple_list_item_2, from, to);
@@ -734,5 +736,24 @@ public class MainActivity extends ActionBarActivity
         Intent myIntent = new Intent(MainActivity.this, About.class);
         //myIntent.putExtra("key", value); //Optional parameters
         MainActivity.this.startActivity(myIntent);
+    }
+}
+
+class MapComparator implements Comparator<Map<String, String>>
+{
+    private final String key;
+
+    public MapComparator(String key)
+    {
+        this.key = key;
+    }
+
+    public int compare(Map<String, String> first,
+                       Map<String, String> second)
+    {
+        // TODO: Null checking, both for maps and values
+        String firstValue = first.get(key);
+        String secondValue = second.get(key);
+        return firstValue.compareTo(secondValue);
     }
 }
