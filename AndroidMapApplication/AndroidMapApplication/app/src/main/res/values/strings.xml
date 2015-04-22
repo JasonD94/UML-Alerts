@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">UML Alert</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_side_menu">SideMenu</string>
+
+    <string name="title_section1">Alerts</string>
+    <string name="title_section2">Contacts</string>
+    <string name="title_section3">Other Settings</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_example">My Location</string>
+
+    <string name="action_settings">About</string>
+    <string name="title_activity_navigation_drawer">NavigationDrawerActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+</resources>
