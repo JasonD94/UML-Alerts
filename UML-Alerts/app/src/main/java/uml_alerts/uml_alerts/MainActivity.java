@@ -234,21 +234,23 @@ public class MainActivity extends ActionBarActivity
         alert_list = (ListView) findViewById(R.id.listView);
 
         alert_list.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-            {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Object obj = (alert_list.getItemAtPosition(position));
 
 
                 //Object obj = parent.getItemAtPosition(position);
-                HashMap<String, String> item = (HashMap<String, String>)obj;
+                HashMap<String, String> item = (HashMap<String, String>) obj;
                 String phoneNumber = "TEST";
                 String alert = "ALERT";
 
                 phoneNumber = item.get("phone_number");
                 alert = item.get("alert");
 
-                Toast.makeText(MainActivity.this, "Number is: " + phoneNumber + "\nAlert is: " + alert, Toast.LENGTH_LONG).show();
-            }});
+                sendSMSMessage(phoneNumber, alert);
+
+//                Toast.makeText(MainActivity.this, "Number is: " + phoneNumber + "\nAlert is: " + alert, Toast.LENGTH_LONG).show();
+            }
+        });
 
         // Sort the alerts.
         alerts_list = sortByKeys(alerts_list);
@@ -597,7 +599,7 @@ public class MainActivity extends ActionBarActivity
      *      Activity that sends an SMS message to a given phone number.
      *      Needs to have a phone number & message set to be successful.
      */
-    protected void sendSMSMessage() {
+    protected void sendSMSMessage(final String _phoneNo, final String _message) {
         Log.i("Send SMS method", "");
 
         AlertDialog.Builder sms = new AlertDialog.Builder(this);
@@ -609,8 +611,8 @@ public class MainActivity extends ActionBarActivity
             public void onClick(DialogInterface dialog, int whichButton) {
                 Toast.makeText(MainActivity.this, "Sending SMS", Toast.LENGTH_SHORT).show();
 
-                String phoneNo = phoneNumber.getText().toString();
-                String message = Message.getText().toString();
+                String phoneNo = _phoneNo;
+                String message = _message;
 
                 // Append a google maps URL to the message with a set location (for now)
                 // Pre-set to Olsen Hall, or 42.654802, -71.326363
@@ -648,7 +650,7 @@ public class MainActivity extends ActionBarActivity
                 // Message for the user explaining why there's a google maps URL at the bottom.
                 String location_msg = "\nMy current location is: ";
 
-                String maps = maps_URL + Double.toString(latitude) + "," + Double.toString(longitude);
+                String maps = maps_URL + Double.toString(longitude) + "," + Double.toString(latitude);
                 message += location_msg + maps;
 
                 try {
