@@ -53,51 +53,10 @@ import java.util.Map;
  *
  * TODO:
  *
- * DONE
- * 1. Figure out how to save data to internal memory.
- *    This includes saving an entire map to storage, so that we can
- *    save the user's phone number / message combinations. These are essentially their
- *    "alerts"
- *
- * DONE
- * 2. Add onclick listeners to the listview items. Make it so if you click on one,
- *    it loads the "send SMS" dialog seen in the MainActivity. This should send the
- *    displayed message to the displayed phone number.
- *
- * Still need to do this.
- * 3. Instead of having the user enter a phone number, allow them to look up a name in their
+ * 1. Instead of having the user enter a phone number, allow them to look up a name in their
  *    address book. Access the contacts book, and let them start typing a name, and display
  *    possible matches. They should be able to press on a name, and have it load that contact's
  *    number into the map, along with whatever message they set.
- *
- *  DONE
- *  5. Add a Google Map page instead to display the user's current location (if GPS is on),
- *     or an approximate location (if network location is on).
- *     Along with the Google Map page, allow user's to send their current location to their
- *     alert contact. This should be a google maps link preferably.
- *
- *     Could use the following URL for that:
- *     https://www.google.com/maps/@42.8398932,-71.5070972
- *
- *     Where the first value is Longitude, the second value is Latitude.
- *
- *     Example message could be:
- *
- *     *ALERT TEXT*
- *     I am currently at the following GPS location:
- *     http://maps.google.com/maps?z=1&h=m&q=loc:42.653167+-71.325955
- *
- *     42.653167, -71.325955
- *
- *     See:
- *     http://stackoverflow.com/questions/2660201/what-parameters-should-i-use-in-a-google-maps-url-to-go-to-a-lat-lon
- *     For Google Maps URL details.
- *
- *     http://maps.google.com/maps?z=1&h=m&q=loc:
- *     42.654802, -71.326363
- *
- *  6.
- *
  *
  */
 
