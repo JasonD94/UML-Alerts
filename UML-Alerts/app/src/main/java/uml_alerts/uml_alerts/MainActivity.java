@@ -20,8 +20,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.telephony.SmsManager;
 import android.text.InputType;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +32,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.opencsv.CSVReader;
@@ -253,28 +254,36 @@ public class MainActivity extends ActionBarActivity
         // Text entry dialog.
         AlertDialog.Builder text_entry = new AlertDialog.Builder(this);
 
-        String Title = "Add A New Alert!";
-        String Message = "Please add a number and a message for this alert.";
+        TextView Title = new TextView(this);
+        Title.setText("Add New Alert");
+        Title.setTextAppearance(this, android.R.style.TextAppearance_Large);
+        Title.setGravity(Gravity.CENTER_HORIZONTAL);
+
+        TextView Msg = new TextView(this);
+        Msg.setText("Please add a contact(s) and a message for this alert.");
+        Msg.setGravity(Gravity.CENTER_HORIZONTAL);
 
         // Edit text to get user input from.
         final EditText number_input = new EditText(this);
         number_input.setHint("Enter your phone number here.");
         number_input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        number_input.setGravity(Gravity.CENTER_HORIZONTAL);
 
         final EditText msg_input = new EditText(this);
         msg_input.setHint("Enter your message here.");
+        msg_input.setGravity(Gravity.CENTER_HORIZONTAL);
 
-        // Create a layout for the two input strings.
+        // Create a layout for the title, about and two input strings.
         LinearLayout lay = new LinearLayout(this);
         lay.setOrientation(LinearLayout.VERTICAL);
+        lay.addView(Title);
+        lay.addView(Msg);
         lay.addView(number_input);
         lay.addView(msg_input);
         text_entry.setView(lay);
 
         // Set the title / message / positive & negative buttons.
-        text_entry.setTitle(Title)
-                .setMessage(Message)
-                .setPositiveButton("Done.", new DialogInterface.OnClickListener() {
+        text_entry.setPositiveButton("Done.", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         mPhone = number_input.getText().toString();
                         mMessage = msg_input.getText().toString();
@@ -299,7 +308,6 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onResume() {
         super.onResume();  // Always call the superclass method first
-
         Log.v(APP_TAG, "Starting onResume()...");
 
         getContacts();
@@ -594,18 +602,18 @@ public class MainActivity extends ActionBarActivity
     }
 
     // Adds options to the menu at the top of the app.
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.main, menu);
-            restoreActionBar();
-            return true;
-        }
-        return super.onCreateOptionsMenu(menu);
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        if (!mNavigationDrawerFragment.isDrawerOpen()) {
+//            // Only show items in the action bar relevant to this screen
+//            // if the drawer is not showing. Otherwise, let the drawer
+//            // decide what to show in the action bar.
+//            getMenuInflater().inflate(R.menu.main, menu);
+//            restoreActionBar();
+//            return true;
+//        }
+//        return super.onCreateOptionsMenu(menu);
+//    }
 
 
     /**
