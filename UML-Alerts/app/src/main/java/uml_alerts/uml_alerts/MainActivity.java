@@ -2,7 +2,6 @@ package uml_alerts.uml_alerts;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -27,14 +26,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
-
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
@@ -55,13 +53,13 @@ import java.util.Map;
  *
  * TODO:
  *
- * I THINK I FIGURED THIS OUT BY USING A CSV FILE
+ * DONE
  * 1. Figure out how to save data to internal memory.
  *    This includes saving an entire map to storage, so that we can
  *    save the user's phone number / message combinations. These are essentially their
  *    "alerts"
  *
- * Still need to do this.
+ * DONE
  * 2. Add onclick listeners to the listview items. Make it so if you click on one,
  *    it loads the "send SMS" dialog seen in the MainActivity. This should send the
  *    displayed message to the displayed phone number.
@@ -72,11 +70,7 @@ import java.util.Map;
  *    possible matches. They should be able to press on a name, and have it load that contact's
  *    number into the map, along with whatever message they set.
  *
- * Need to remove this.
- *  4. The contact's page would then be unnecessary. Remove it, plus the main activity.
- *     The user should then be sent directly the alerts page.
- *
- *  THIS SHOULD BE DONE:
+ *  DONE
  *  5. Add a Google Map page instead to display the user's current location (if GPS is on),
  *     or an approximate location (if network location is on).
  *     Along with the Google Map page, allow user's to send their current location to their
@@ -119,10 +113,6 @@ public class MainActivity extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
-
-    Button sendBtn;
-    EditText phoneNumber;
-    EditText Message;
 
     // Google Maps base URL
     private static final String maps_URL = "http://maps.google.com/maps?z=1&h=m&q=loc:";
@@ -207,17 +197,14 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-    /*
-     * Paramterized method to sort Map e.g. HashMap or Hashtable in Java
-     * throw NullPointerException if Map contains null key
-     */
+    // Sorts a HashMap
     public static <K extends Comparable,V extends Comparable> Map<K,V> sortByKeys(Map<K,V> map){
         List<K> keys = new LinkedList<K>(map.keySet());
         Collections.sort(keys);
 
         //LinkedHashMap will keep the keys in the order they are inserted
         //which is currently sorted on natural ordering
-        Map<K,V> sortedMap = new LinkedHashMap<K,V>();
+        Map<K,V> sortedMap = new LinkedHashMap<>();
         for(K key: keys){
             sortedMap.put(key, map.get(key));
         }
@@ -287,9 +274,6 @@ public class MainActivity extends ActionBarActivity
             tmp_list.add(putData(entry.getKey(), entry.getValue()));
         }
 
-        // These are defaults, just for testing!
-//        tmp_list.add(putData("603-999-9999", "Help! I've fallen and I can't get up!"));
-//        tmp_list.add(putData("867-123-4567", "I'm being stalked! CALL THE POLICE!"));
         return tmp_list;
     }
 
@@ -396,9 +380,6 @@ public class MainActivity extends ActionBarActivity
         // Create an instance of the CSVWriter class. Give it the CSV file's name.
         CSVWriter writer = new CSVWriter(new FileWriter(csv_path));
 
-        // Try saving just one thing for the time being. A simple # and Msg.
-//        String[] alert = "6034930229,Please help I'm being stalked by an angry man!".split(",");
-
         // While we've got a valid thing in the map.
         for(Map.Entry<String, String> entry : alerts_list.entrySet()) {
             // Now pair will have a key / value that we can save.
@@ -409,9 +390,6 @@ public class MainActivity extends ActionBarActivity
             String[] cur_alert = next.split(",");
             writer.writeNext(cur_alert);
         }
-
-//        // Write the testing alert to file.
-//        writer.writeNext(alert);
 
         // Close the writer.
         writer.close();
@@ -446,7 +424,6 @@ public class MainActivity extends ActionBarActivity
         //  Below this is the button code.
         // ********************************
         addAlertButton = (Button) findViewById(R.id.AddAlertButton);
-
         addAlertButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 AddAlert();
@@ -460,17 +437,6 @@ public class MainActivity extends ActionBarActivity
             // Do stuff with the exception.
             Log.v(APP_TAG, "Couldn't open CSV file!", e);
         }
-
-        // SMS stuff
-//        sendBtn = (Button) findViewById(R.id.sendSMS);
-//        phoneNumber = (EditText) findViewById(R.id.phoneNo);
-//        Message = (EditText) findViewById(R.id.sendMsg);
-
-//        sendBtn.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View view) {
-//                sendSMSMessage();
-//            }
-//        });
     }
 
     // Adds all the alerts to the list view.
@@ -508,13 +474,11 @@ public class MainActivity extends ActionBarActivity
         // For now deal with just SMS messages so just one number per alert.
 
         contactData = new ArrayList<>();
-        ContentResolver cr = getContentResolver();
         Cursor cursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,null, null, null, null);
         while (cursor.moveToNext()) {
             try{
                 String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
                 String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                String hasPhone = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER));
                 if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
                     Cursor phones = getContentResolver().query( ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
                             ContactsContract.CommonDataKinds.Phone.CONTACT_ID +" = "+ contactId, null, null);
@@ -616,8 +580,8 @@ public class MainActivity extends ActionBarActivity
 
                 // Append a google maps URL to the message with a set location (for now)
                 // Pre-set to Olsen Hall, or 42.654802, -71.326363
-                double longitude = 42.654802;
-                double latitude = -71.326363;
+                double latitude = 42.654802;
+                double longitude = -71.326363;
 
                 // Get location - simplest way, all we want is lat and long!
                 LocationManager locationManager;
@@ -636,12 +600,11 @@ public class MainActivity extends ActionBarActivity
 //                Location location = locationManager.getLastKnownLocation(provider);
 
                 updateWithNewLocation(location);
-//
 //                locationManager.requestLocationUpdates(provider, 2000, 10, locationListener);
 
                 try {
-                    latitude = location.getLatitude ();
-                    longitude = location.getLongitude ();
+                    latitude = location.getLatitude();
+                    longitude = location.getLongitude();
                 }
                 catch (NullPointerException e){
                     Log.v("UML ALERTS", "Couldn't get location. :(", e);
@@ -650,7 +613,7 @@ public class MainActivity extends ActionBarActivity
                 // Message for the user explaining why there's a google maps URL at the bottom.
                 String location_msg = "\nMy current location is: ";
 
-                String maps = maps_URL + Double.toString(longitude) + "," + Double.toString(latitude);
+                String maps = maps_URL + Double.toString(latitude) + "," + Double.toString(longitude);
                 message += location_msg + maps;
 
                 try {
@@ -664,8 +627,6 @@ public class MainActivity extends ActionBarActivity
                             Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 }
-
-
             }});
         sms.setNegativeButton(android.R.string.no, null);
 
@@ -761,19 +722,14 @@ public class MainActivity extends ActionBarActivity
     }
 }
 
-class MapComparator implements Comparator<Map<String, String>>
-{
+class MapComparator implements Comparator<Map<String, String>> {
     private final String key;
 
-    public MapComparator(String key)
-    {
+    public MapComparator(String key) {
         this.key = key;
     }
 
-    public int compare(Map<String, String> first,
-                       Map<String, String> second)
-    {
-        // TODO: Null checking, both for maps and values
+    public int compare(Map<String, String> first, Map<String, String> second) {
         String firstValue = first.get(key);
         String secondValue = second.get(key);
         return firstValue.compareTo(secondValue);
