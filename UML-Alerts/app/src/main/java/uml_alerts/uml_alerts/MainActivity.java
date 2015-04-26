@@ -2,13 +2,10 @@ package uml_alerts.uml_alerts;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
@@ -52,10 +49,9 @@ import java.util.Map;
  *
  * TODO:
  *
- * 1. Instead of having the user enter a phone number, allow them to look up a name in their
- *    address book. Access the contacts book, and let them start typing a name, and display
- *    possible matches. They should be able to press on a name, and have it load that contact's
- *    number into the map, along with whatever message they set.
+ *      - Fix location.
+ *      - Overall design fixes
+ *      - Make screen capture demoing the app
  *
  */
 
@@ -102,6 +98,9 @@ public class MainActivity extends ActionBarActivity
     // User input variables from the dialog for entering a phone number / message
     String mMessage = "";
     String mPhone = "";
+
+    // Location Manager.
+    GPSTracker gps;
 
 
     /**
@@ -150,6 +149,21 @@ public class MainActivity extends ActionBarActivity
         } catch (Exception e) {
             // Do stuff with the exception.
             Log.v(APP_TAG, "Couldn't open CSV file!", e);
+        }
+
+        // Setup the location stuff.
+        gps = new GPSTracker(this);
+        if(gps.canGetLocation()) {
+            double latitude = gps.getLatitude();
+            double longitude = gps.getLongitude();
+
+            // \n is for new line
+            Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
+        }else{
+            // can't get location
+            // GPS or Network is not enabled
+            // Ask user to enable GPS/network in settings
+            gps.showSettingsAlert();
         }
     }
 
@@ -522,27 +536,39 @@ public class MainActivity extends ActionBarActivity
                 // We need to get a list of the people we selected above.
                 SparseBooleanArray checked = contact_list.getCheckedItemPositions();
                 ArrayList<String> selectedItems = new ArrayList<>();
+
                 for (int i = 0; i < checked.size(); i++) {
+
                     // Item position in adapter
                     int position = checked.keyAt(i);
-                    // Add sport if it is checked i.e.) == TRUE!
-                    if (checked.valueAt(i)) {
-                        Object obj = (contact_list.getItemAtPosition(position));
 
+                    // Add the contact
+                    if (checked.valueAt(i)) {
+
+                        // Get the values from the list.
+                        Object obj = (contact_list.getItemAtPosition(position));
                         HashMap<String, String> item = (HashMap<String, String>) obj;
+
+                        // Get just the phone number / contact name.
                         String phoneNumber = item.get("number");
+                        String contactName = item.get("name");
+                        String alert = contactName + "  " + phoneNumber;
+
+                        // Test log.
+                        Log.v("Adding new alert: ", alert);
 
                         // Add the current number to the ArrayList.
-                        selectedItems.add(phoneNumber); //contact);
+                        selectedItems.add(alert);
                     }
                 }
 
                 // Now that we have an array list of strings, we can create the
-                // one string that will save all the phone numbers separated by dots. (".")
+                // one string that will save all the phone numbers separated by new lines (\n)
                 StringBuilder builder = new StringBuilder((""));
                 for(String val : selectedItems) {
-                    builder.append(val).append("\n");
+                    builder.append(val).append("\n");       // Append a newline.
                 }
+                // Setup phone number / message
                 mPhone = builder.toString();
                 mMessage = msg_input.getText().toString();
 
@@ -630,8 +656,14 @@ public class MainActivity extends ActionBarActivity
      *      Method that sends an SMS message to a given phone number.
      *      Needs to have a phone number & message set to be successful.
      *
-     *      In the future: multiple numbers will be separated by a "." and will send
+     *      _phoneNo string works as following:
+     *      CONTACT_NAME     CONTACT_NUMBER\n
+     *      **if more than one contact, it would appear here **
+     *
+     *      Multiple numbers are separated by a "\n" and will send
      *      separate SMS messages to those numbers.
+     *
+     *      Name / Numbers are separated by five space characters.
      */
     protected void sendSMSMessage(final String _phoneNo, final String _message) {
         Log.i("Send SMS method", "");
@@ -647,14 +679,20 @@ public class MainActivity extends ActionBarActivity
 
                 // Parse the phone number string for (possibly) multiple phone numbers,
                 // separated by newlines ("\n")
-                List<String> numbers= new ArrayList<>();
+                List<String> numbers;
                 numbers = Arrays.asList(_phoneNo.split("\n"));
 
                 for(String num : numbers) {
                     Log.v("Sending SMS Alert to: ", num);
 
-                    String phoneNo = num;
+                    // Note - we now need to separate the String "num" as we just want
+                    // the contacts number, not there name! These are separated by two spaces ("  ")
+                    String[] parts = num.split("  ");
+
+                    String phoneNo = parts[1];
                     String message = _message;
+
+                    Log.v("Sending SMS Alert to: ", phoneNo);
 
                     /**
                      *      THE LOCATION STUFF HERE IS PROBABLY BROKEN,
@@ -667,26 +705,14 @@ public class MainActivity extends ActionBarActivity
                     double latitude = 42.654802;
                     double longitude = -71.326363;
 
-                    // Get location - simplest way, all we want is lat and long!
-                    LocationManager locationManager;
-                    String svcName = Context.LOCATION_SERVICE;
-                    locationManager = (LocationManager) getSystemService(svcName);
-
-                    Criteria criteria = new Criteria();
-                    criteria.setAccuracy(Criteria.ACCURACY_FINE);
-                    criteria.setAltitudeRequired(false);
-                    criteria.setBearingRequired(false);
-                    criteria.setSpeedRequired(false);
-                    criteria.setCostAllowed(true);
-
-                    Location location = locationManager.getLastKnownLocation(locationManager.NETWORK_PROVIDER);
-                    updateWithNewLocation(location);
-
-                    try {
-                        latitude = location.getLatitude();
-                        longitude = location.getLongitude();
-                    } catch (NullPointerException e) {
-                        Log.v("UML ALERTS", "Couldn't get location. :(", e);
+                    if(gps.canGetLocation()) {
+                        latitude = gps.getLatitude();
+                        longitude = gps.getLongitude();
+                    } else {
+                        // can't get location
+                        // GPS or Network is not enabled
+                        // Ask user to enable GPS/network in settings
+                        gps.showSettingsAlert();
                     }
 
                     // Message for the user explaining why there's a google maps URL at the bottom.
