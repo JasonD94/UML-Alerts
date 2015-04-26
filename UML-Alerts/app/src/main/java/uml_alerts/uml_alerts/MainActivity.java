@@ -285,6 +285,138 @@ public class MainActivity extends ActionBarActivity
     }
 
 
+    // Technically this just redoes the list view stuff.
+    // Don't really need this method if we're going to do it the lazy way.
+    public void updateListView() {
+        Log.v(APP_TAG, "Starting updateListView()...");
+        createAlerts();
+    }
+
+
+    // Adds all the alerts to the list view.
+    private void createAlerts() {
+        Log.v("createListView", "Starting createListView()...");
+
+        // Get the list view from the XML file.
+        alert_list = (ListView) findViewById(R.id.listView);
+
+        // Onclick listener for the alerts.
+        alert_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                // Get the phone number(s) and the alert from the ListView
+                Object obj = (alert_list.getItemAtPosition(position));
+                HashMap<String, String> item = (HashMap<String, String>) obj;
+                String phoneNumber = "TEST";
+                String alert = "ALERT";
+
+                phoneNumber = item.get("phone_number");
+                alert = item.get("alert");
+
+                sendSMSMessage(phoneNumber, alert);
+            }
+        });
+
+        // Setup the Add alerts button.
+        addAlertButton = (Button) findViewById(R.id.AddAlertButton);
+        addAlertButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                AddAlert();
+            }
+        });
+
+        // Sort the alerts.
+        alerts_list = sortByKeys(alerts_list);
+
+        // Create a list of two items.
+        // One is the user's phone number.
+        // The other is the alert message.
+        list = buildData();
+
+        // From is a list of Key's.
+        // to is an array of IDs for the strings.
+        String[] from = {"phone_number", "alert"};
+        int[] to = {android.R.id.text1, android.R.id.text2};
+
+        // Simple adapter is all we need for this.
+        list_adapter = new SimpleAdapter(this, list, android.R.layout.simple_list_item_2, from, to);
+        alert_list.setAdapter(list_adapter);
+    }
+
+
+    // Adds all the user's contacts to the list view.
+    private void createContacts() {
+        Log.v("createContacts", "Starting createContacts()...");
+
+        // Get the list view from the XML file.
+        contacts_list = (ListView) findViewById(R.id.listView);
+
+        // Onclick listener for the contacts
+        contacts_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // This does nothing because it shouldn't do anything at all.
+            }
+        });
+
+        // Make the "add new alert button" actually just pop up the add new contact page.
+        // Setup the Add alerts button.
+        addAlertButton = (Button) findViewById(R.id.AddAlertButton);
+        addAlertButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                AddContact();
+            }
+        });
+
+
+        // From is a list of Key's.
+        // to is an array of IDs for the strings.
+        String[] from = {"name", "number"};
+        int[] to = {android.R.id.text1, android.R.id.text2};
+
+        // Sort the contacts in order.
+        Collections.sort(contactData, new MapComparator("name"));
+
+        // Simple adapter is all we need for this.
+        list_adapter = new SimpleAdapter(this, contactData, android.R.layout.simple_list_item_2, from, to);
+        contacts_list.setAdapter(list_adapter);
+    }
+
+
+    // Pulls data from the user's contacts book into the contacts map.
+    public void getContacts() {
+        Log.v("getContacts()", "Starting getContacts()...");
+
+        // This code is for displaying contacts.
+        // We should in fact search through contacts and save their number in the map instead.
+        // May need to make an array of numbers though if more than one.
+        // For now deal with just SMS messages so just one number per alert.
+
+        contactData = new ArrayList<>();
+        Cursor cursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+        while (cursor.moveToNext()) {
+            try {
+                String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
+                    Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId, null, null);
+                    while (phones.moveToNext()) {
+                        String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("name", name);
+                        map.put("number", phoneNumber);
+                        contactData.add(map);
+                    }
+                    phones.close();
+                }
+            } catch (Exception e) {
+
+            }
+        }
+        cursor.close();
+    }
+
+
     // This alerts an alert to the map, and onPause saves the map data to a csv file.
     // Makes a simple alert dialog with its own view stuff.
     public void AddAlert() {
@@ -350,15 +482,28 @@ public class MainActivity extends ActionBarActivity
                     // Item position in adapter
                     int position = checked.keyAt(i);
                     // Add sport if it is checked i.e.) == TRUE!
-                    if (checked.valueAt(i))
-                        selectedItems.add(list_adapter.getItem(position));
+                    if (checked.valueAt(i)) {
+                        Object obj = (contact_list.getItemAtPosition(position));
+
+
+                        //Object obj = parent.getItemAtPosition(position);
+                        HashMap<String, String> item = (HashMap<String, String>) obj;
+                        //String name = item.get("name");
+                        String phoneNumber = item.get("number");
+//                        String contact = name + " " + phoneNumber;
+
+                        // Add the current number to the ArrayList.
+                        selectedItems.add(phoneNumber); //contact);
+                    }
                 }
 
-                String[] outputStrArr = new String[selectedItems.size()];
-
-                for (int i = 0; i < selectedItems.size(); i++) {
-                    outputStrArr[i] = selectedItems.get(i);
+                // Now that we have an array list of strings, we can create the
+                // one string that will save all the phone numbers separated by dots. (".")
+                StringBuilder builder = new StringBuilder((""));
+                for(String val : selectedItems) {
+                    builder.append(val).append("\n");
                 }
+                mPhone = builder.toString();
 
                 mMessage = msg_input.getText().toString();
 
@@ -379,124 +524,10 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-//    @Override
-//    protected void onNewIntent(Intent intent) {
-//        if (ContactsContract.Intents.SEARCH_SUGGESTION_CLICKED.equals(intent.getAction())) {
-//            //handles suggestion clicked query
-//            String displayName = getDisplayNameForContact(intent);
-//            resultText.setText(displayName);
-//        } else if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-//            // handles a search query
-//            String query = intent.getStringExtra(SearchManager.QUERY);
-//        }
-//    }
-
-
-    // Technically this just redoes the list view stuff.
-    // Don't really need this method if we're going to do it the lazy way.
-    public void updateListView() {
-        Log.v(APP_TAG, "Starting updateListView()...");
-        createAlerts();
-    }
-
-
-    // Adds all the alerts to the list view.
-    private void createAlerts() {
-        Log.v("createListView", "Starting createListView()...");
-
-        // Get the list view from the XML file.
-        alert_list = (ListView) findViewById(R.id.listView);
-
-        // Onclick listener for the alerts.
-        alert_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Object obj = (alert_list.getItemAtPosition(position));
-
-
-                //Object obj = parent.getItemAtPosition(position);
-                HashMap<String, String> item = (HashMap<String, String>) obj;
-                String phoneNumber = "TEST";
-                String alert = "ALERT";
-
-                phoneNumber = item.get("phone_number");
-                alert = item.get("alert");
-
-                sendSMSMessage(phoneNumber, alert);
-            }
-        });
-
-        // Sort the alerts.
-        alerts_list = sortByKeys(alerts_list);
-
-        // Create a list of two items.
-        // One is the user's phone number.
-        // The other is the alert message.
-        list = buildData();
-
-        // From is a list of Key's.
-        // to is an array of IDs for the strings.
-        String[] from = {"phone_number", "alert"};
-        int[] to = {android.R.id.text1, android.R.id.text2};
-
-        // Simple adapter is all we need for this.
-        list_adapter = new SimpleAdapter(this, list, android.R.layout.simple_list_item_2, from, to);
-        alert_list.setAdapter(list_adapter);
-    }
-
-
-    // Adds all the user's contacts to the list view.
-    private void createContacts() {
-        Log.v("createContacts", "Starting createContacts()...");
-
-        // Get the list view from the XML file.
-        contacts_list = (ListView) findViewById(R.id.listView);
-
-        // From is a list of Key's.
-        // to is an array of IDs for the strings.
-        String[] from = {"name", "number"};
-        int[] to = {android.R.id.text1, android.R.id.text2};
-
-        // Sort the contacts in order.
-        Collections.sort(contactData, new MapComparator("name"));
-
-        // Simple adapter is all we need for this.
-        list_adapter = new SimpleAdapter(this, contactData, android.R.layout.simple_list_item_2, from, to);
-        contacts_list.setAdapter(list_adapter);
-    }
-
-
-    // Pulls data from the user's contacts book into the contacts map.
-    public void getContacts() {
-        Log.v("getContacts()", "Starting getContacts()...");
-
-        // This code is for displaying contacts.
-        // We should in fact search through contacts and save their number in the map instead.
-        // May need to make an array of numbers though if more than one.
-        // For now deal with just SMS messages so just one number per alert.
-
-        contactData = new ArrayList<>();
-        Cursor cursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
-        while (cursor.moveToNext()) {
-            try {
-                String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
-                    Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
-                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId, null, null);
-                    while (phones.moveToNext()) {
-                        String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                        HashMap<String, String> map = new HashMap<>();
-                        map.put("name", name);
-                        map.put("number", phoneNumber);
-                        contactData.add(map);
-                    }
-                    phones.close();
-                }
-            } catch (Exception e) {
-
-            }
-        }
-        cursor.close();
+    // Simple function for (+) button.
+    public void AddContact() {
+        Intent intent = new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI);
+        startActivity(intent);
     }
 
 
@@ -573,58 +604,69 @@ public class MainActivity extends ActionBarActivity
         sms.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int whichButton) {
-                Toast.makeText(MainActivity.this, "Sending SMS", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Sending Alert(s)", Toast.LENGTH_SHORT).show();
 
-                String phoneNo = _phoneNo;
-                String message = _message;
+                // Parse the phone number string for (possibly) multiple phone numbers,
+                // separated by newlines ("\n")
+                List<String> numbers= new ArrayList<>();
+                numbers = Arrays.asList(_phoneNo.split("\n"));
 
-                // Append a google maps URL to the message with a set location (for now)
-                // Pre-set to Olsen Hall, or 42.654802, -71.326363
-                double latitude = 42.654802;
-                double longitude = -71.326363;
+                for(String num : numbers) {
+                    Log.v("Sending SMS Alert to: ", num);
 
-                // Get location - simplest way, all we want is lat and long!
-                LocationManager locationManager;
-                String svcName = Context.LOCATION_SERVICE;
-                locationManager = (LocationManager) getSystemService(svcName);
+                    String phoneNo = num;
+                    String message = _message;
 
-                Criteria criteria = new Criteria();
-                criteria.setAccuracy(Criteria.ACCURACY_FINE);
-                criteria.setAltitudeRequired(false);
-                criteria.setBearingRequired(false);
-                criteria.setSpeedRequired(false);
-                criteria.setCostAllowed(true);
-                //String provider = locationManager.getBestProvider(criteria, true);
+                    /**
+                     *      THE LOCATION STUFF HERE IS PROBABLY BROKEN,
+                     *      USE UDIT'S FIXED LOCATION STUFF...
+                     *
+                     */
 
-                Location location = locationManager.getLastKnownLocation(locationManager.NETWORK_PROVIDER);
-//                Location location = locationManager.getLastKnownLocation(provider);
+                    // Append a google maps URL to the message with a set location (for now)
+                    // Pre-set to Olsen Hall, or 42.654802, -71.326363
+                    double latitude = 42.654802;
+                    double longitude = -71.326363;
 
-                updateWithNewLocation(location);
-//                locationManager.requestLocationUpdates(provider, 2000, 10, locationListener);
+                    // Get location - simplest way, all we want is lat and long!
+                    LocationManager locationManager;
+                    String svcName = Context.LOCATION_SERVICE;
+                    locationManager = (LocationManager) getSystemService(svcName);
 
-                try {
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
-                } catch (NullPointerException e) {
-                    Log.v("UML ALERTS", "Couldn't get location. :(", e);
-                }
+                    Criteria criteria = new Criteria();
+                    criteria.setAccuracy(Criteria.ACCURACY_FINE);
+                    criteria.setAltitudeRequired(false);
+                    criteria.setBearingRequired(false);
+                    criteria.setSpeedRequired(false);
+                    criteria.setCostAllowed(true);
 
-                // Message for the user explaining why there's a google maps URL at the bottom.
-                String location_msg = "\nMy current location is: ";
+                    Location location = locationManager.getLastKnownLocation(locationManager.NETWORK_PROVIDER);
+                    updateWithNewLocation(location);
 
-                String maps = maps_URL + Double.toString(latitude) + "," + Double.toString(longitude);
-                message += location_msg + maps;
+                    try {
+                        latitude = location.getLatitude();
+                        longitude = location.getLongitude();
+                    } catch (NullPointerException e) {
+                        Log.v("UML ALERTS", "Couldn't get location. :(", e);
+                    }
 
-                try {
-                    SmsManager smsManager = SmsManager.getDefault();
-                    smsManager.sendTextMessage(phoneNo, null, message, null, null);
-                    Toast.makeText(getApplicationContext(), "SMS sent.",
-                            Toast.LENGTH_SHORT).show();
-                } catch (Exception e) {
-                    Toast.makeText(getApplicationContext(),
-                            "SMS failed, please try again.",
-                            Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
+                    // Message for the user explaining why there's a google maps URL at the bottom.
+                    String location_msg = "\nMy current location is: ";
+
+                    String maps = maps_URL + Double.toString(latitude) + "," + Double.toString(longitude);
+                    message += location_msg + maps;
+
+                    try {
+                        SmsManager smsManager = SmsManager.getDefault();
+                        smsManager.sendTextMessage(phoneNo, null, message, null, null);
+                        Toast.makeText(getApplicationContext(), "SMS sent.",
+                                Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Toast.makeText(getApplicationContext(),
+                                "SMS failed, please try again.",
+                                Toast.LENGTH_SHORT).show();
+                        e.printStackTrace();
+                    }
                 }
             }
         });
