@@ -317,6 +317,25 @@ public class MainActivity extends ActionBarActivity
             }
         });
 
+        // Long click listener for deleting alerts
+        alert_list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                // Get the phone number(s) from the ListView
+                Object obj = (alert_list.getItemAtPosition(position));
+                HashMap<String, String> item = (HashMap<String, String>) obj;
+                String phoneNumber = item.get("phone_number");
+
+                Log.v("Deleting phone number: ", phoneNumber);
+
+                // Delete the alert from the map.
+                alerts_list.values().removeAll(Collections.singleton(phoneNumber));
+
+                // Redraw the ListView
+                createAlerts();
+                return false;
+            }
+        });
+
         // Setup the Add alerts button.
         addAlertButton = (Button) findViewById(R.id.AddAlertButton);
         addAlertButton.setOnClickListener(new View.OnClickListener() {
@@ -659,7 +678,7 @@ public class MainActivity extends ActionBarActivity
                     try {
                         SmsManager smsManager = SmsManager.getDefault();
                         smsManager.sendTextMessage(phoneNo, null, message, null, null);
-                        Toast.makeText(getApplicationContext(), "SMS sent.",
+                        Toast.makeText(getApplicationContext(), "SMS sent to: " + phoneNo,
                                 Toast.LENGTH_SHORT).show();
                     } catch (Exception e) {
                         Toast.makeText(getApplicationContext(),
