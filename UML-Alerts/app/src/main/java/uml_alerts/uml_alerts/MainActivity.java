@@ -8,25 +8,22 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.telephony.SmsManager;
-import android.text.InputType;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -64,14 +61,7 @@ import java.util.Map;
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
-    private NavigationDrawerFragment mNavigationDrawerFragment;
-
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
+    // Used to store the last screen title. For use in {@link #restoreActionBar()}.
     private CharSequence mTitle;
 
     // Google Maps base URL
@@ -84,14 +74,14 @@ public class MainActivity extends ActionBarActivity
     private static final String APP_TAG = "UML ALERTS";
 
     // Map for the Alerts.
-    // Key: Phone Number (in String form)
+    // Key: Phone Number (in String form) - soon to be separated by dots for other numbers.
     // Value: Message
     Map<String, String> alerts_list = new HashMap<>();
 
     // Map for the contacts
     // Key: Name
     // Value: Phone Number
-    ArrayList<HashMap<String,String>> contactData;
+    ArrayList<HashMap<String, String>> contactData;
 
     // ListView to display the alerts.
     ListView alert_list;
@@ -113,6 +103,89 @@ public class MainActivity extends ActionBarActivity
     String mPhone = "";
 
 
+    /**
+     *      Android related methods are at the top.
+     *      Other app related methods are below the Android stuff.
+     */
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        // Logcat, one for every function / method.
+        Log.v(APP_TAG, "Starting onCreate()...");
+
+        // Fragment managing the behaviors, interactions and presentation of the navigation drawer.
+        NavigationDrawerFragment mNavigationDrawerFragment = (NavigationDrawerFragment)
+                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+        mTitle = getTitle();
+
+        // Set up the drawer.
+        mNavigationDrawerFragment.setUp(
+                R.id.navigation_drawer,
+                (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        // Loads the ListView up with alerts.
+        createAlerts();
+
+        // Get the contact data into the ArrayList.
+        getContacts();
+
+        // ********************************
+        //  Below this is the button code.
+        // ********************************
+        addAlertButton = (Button) findViewById(R.id.AddAlertButton);
+        addAlertButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                AddAlert();
+            }
+        });
+
+        try {
+            // Try and open / read from the CSV file.
+            OpenCSV();
+        } catch (Exception e) {
+            // Do stuff with the exception.
+            Log.v(APP_TAG, "Couldn't open CSV file!", e);
+        }
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();  // Always call the superclass method first
+
+        Log.v(APP_TAG, "Starting onPause()...");
+
+        // Call the SaveCSV function to save the map data to a CSV file.
+        try {
+            SaveCSV();
+        } catch (Exception e) {
+            // Write exception to logcat.
+            Log.v(APP_TAG, "Error! Couldn't save file to CSV!", e);
+        }
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();  // Always call the superclass method first
+        Log.v(APP_TAG, "Starting onResume()...");
+
+        getContacts();
+
+        try {
+            // Try and open / read from the CSV file.
+            OpenCSV();
+        } catch (Exception e) {
+            // Do stuff with the exception.
+            Log.v(APP_TAG, "Couldn't open CSV file!", e);
+        }
+    }
+
+
     // Open data from a CSV file, save to the map.
     public void OpenCSV() throws Exception {
         // Opening CSV file log.
@@ -130,7 +203,7 @@ public class MainActivity extends ActionBarActivity
         // Read all the data off the CSV file.
         line = reader.readNext();
 
-        while(line != null) {
+        while (line != null) {
             // This gets the line and splits it based on the comma.
             List<String> container = Arrays.asList(line);
 
@@ -157,72 +230,34 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-    // Sorts a HashMap
-    public static <K extends Comparable,V extends Comparable> Map<K,V> sortByKeys(Map<K,V> map){
-        List<K> keys = new LinkedList<K>(map.keySet());
-        Collections.sort(keys);
+    // Read from CSV file into local map variable.
+    public void SaveCSV() throws Exception {
+        // Opening CSV file log.
+        Log.v(APP_TAG, "Starting SaveCSV()...");
 
-        //LinkedHashMap will keep the keys in the order they are inserted
-        //which is currently sorted on natural ordering
-        Map<K,V> sortedMap = new LinkedHashMap<>();
-        for(K key: keys){
-            sortedMap.put(key, map.get(key));
+        // Get path for storing / accessing the CSV file.
+        String csv_path = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + CSV_FILE;
+
+        // Create an instance of the CSVWriter class. Give it the CSV file's name.
+        CSVWriter writer = new CSVWriter(new FileWriter(csv_path));
+
+        // While we've got a valid thing in the map.
+        for (Map.Entry<String, String> entry : alerts_list.entrySet()) {
+            // Now pair will have a key / value that we can save.
+            String key = entry.getKey();
+            String value = entry.getValue();
+            String next = key + "," + value;
+
+            String[] cur_alert = next.split(",");
+            writer.writeNext(cur_alert);
         }
 
-        return sortedMap;
+        // Close the writer.
+        writer.close();
     }
 
 
-
-    public void createListView() {
-        Log.v("createListView", "Starting createListView()...");
-
-        // Get the list view from the XML file.
-        alert_list = (ListView) findViewById(R.id.listView);
-
-        alert_list.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Object obj = (alert_list.getItemAtPosition(position));
-
-
-                //Object obj = parent.getItemAtPosition(position);
-                HashMap<String, String> item = (HashMap<String, String>) obj;
-                String phoneNumber = "TEST";
-                String alert = "ALERT";
-
-                phoneNumber = item.get("phone_number");
-                alert = item.get("alert");
-
-                sendSMSMessage(phoneNumber, alert);
-
-//                Toast.makeText(MainActivity.this, "Number is: " + phoneNumber + "\nAlert is: " + alert, Toast.LENGTH_LONG).show();
-            }
-        });
-
-        // Sort the alerts.
-        alerts_list = sortByKeys(alerts_list);
-
-        // Create a list of two items.
-        // One is the user's phone number.
-        // The other is the alert message.
-        list = buildData();
-
-        // From is a list of Key's.
-        // to is an array of IDs for the strings.
-        String[] from = { "phone_number", "alert" };
-        int[] to = { android.R.id.text1, android.R.id.text2 };
-
-        // Simple adapter is all we need for this.
-        list_adapter = new SimpleAdapter(this, list, android.R.layout.simple_list_item_2, from, to);
-        alert_list.setAdapter(list_adapter);
-    }
-
-    public void updateListView() {
-        Log.v(APP_TAG, "Starting updateListView()...");
-        createListView();
-    }
-
-
+    // This builds up the alerts ArrayList
     private ArrayList<Map<String, String>> buildData() {
         // This will at some point pull from the alerts_list map!
         // For now it is hard coded for testing purposes.
@@ -238,6 +273,8 @@ public class MainActivity extends ActionBarActivity
     }
 
 
+    // This is used by the above buildData as a helper method to generate the ArrayList
+    // from the alerts map.
     private HashMap<String, String> putData(String phone_number, String alert) {
         Log.v(APP_TAG, "Starting putData()...");
 
@@ -248,11 +285,15 @@ public class MainActivity extends ActionBarActivity
     }
 
 
+    // This alerts an alert to the map, and onPause saves the map data to a csv file.
+    // Makes a simple alert dialog with its own view stuff.
     public void AddAlert() {
         Log.i(APP_TAG, "Starting AddAlert()...");
 
         // Text entry dialog.
         AlertDialog.Builder text_entry = new AlertDialog.Builder(this);
+
+        String result_number;
 
         TextView Title = new TextView(this);
         Title.setText("Add New Alert");
@@ -263,38 +304,71 @@ public class MainActivity extends ActionBarActivity
         Msg.setText("Please add a contact(s) and a message for this alert.");
         Msg.setGravity(Gravity.CENTER_HORIZONTAL);
 
-        // Edit text to get user input from.
-        final EditText number_input = new EditText(this);
-        number_input.setHint("Enter your phone number here.");
-        number_input.setInputType(InputType.TYPE_CLASS_NUMBER);
-        number_input.setGravity(Gravity.CENTER_HORIZONTAL);
+        // ** Display a list of contacts that we want to select from. **
+        // Get the list view from the XML file.
+        final ListView contact_list = new ListView(this);
 
+        // From is a list of Key's.
+        // to is an array of IDs for the strings.
+        String[] from = {"name", "number"};
+        int[] to = {android.R.id.text1, android.R.id.text2};
+
+        // Sort the contacts in order.
+        Collections.sort(contactData, new MapComparator("name"));
+
+        // Simple adapter is all we need for this.
+        list_adapter = new SimpleAdapter(this, contactData, android.R.layout.simple_list_item_multiple_choice, from, to);
+
+        // Allow multiple choices for the list view.
+        // See the following site for help:
+        // http://theopentutorials.com/tutorials/android/listview/android-multiple-selection-listview/
+        contact_list.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        contact_list.setAdapter(list_adapter);
+
+        // Get the message
         final EditText msg_input = new EditText(this);
         msg_input.setHint("Enter your message here.");
-        msg_input.setGravity(Gravity.CENTER_HORIZONTAL);
+        msg_input.setGravity(Gravity.LEFT);
 
         // Create a layout for the title, about and two input strings.
         LinearLayout lay = new LinearLayout(this);
         lay.setOrientation(LinearLayout.VERTICAL);
         lay.addView(Title);
         lay.addView(Msg);
-        lay.addView(number_input);
         lay.addView(msg_input);
+        lay.addView(contact_list);
         text_entry.setView(lay);
 
         // Set the title / message / positive & negative buttons.
         text_entry.setPositiveButton("Done.", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        mPhone = number_input.getText().toString();
-                        mMessage = msg_input.getText().toString();
+            public void onClick(DialogInterface dialog, int whichButton) {
 
-                        // Add the phone number / message to the map of alerts.
-                        alerts_list.put(mPhone, mMessage);
+                // We need to get a list of the people we selected above.
+                SparseBooleanArray checked = contact_list.getCheckedItemPositions();
+                ArrayList<String> selectedItems = new ArrayList<>();
+                for (int i = 0; i < checked.size(); i++) {
+                    // Item position in adapter
+                    int position = checked.keyAt(i);
+                    // Add sport if it is checked i.e.) == TRUE!
+                    if (checked.valueAt(i))
+                        selectedItems.add(list_adapter.getItem(position));
+                }
 
-                        // Update the ListView.
-                        updateListView();
-                    }
-                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                String[] outputStrArr = new String[selectedItems.size()];
+
+                for (int i = 0; i < selectedItems.size(); i++) {
+                    outputStrArr[i] = selectedItems.get(i);
+                }
+
+                mMessage = msg_input.getText().toString();
+
+                // Add the phone number / message to the map of alerts.
+                alerts_list.put(mPhone, mMessage);
+
+                // Update the ListView.
+                updateListView();
+            }
+        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 dialog.cancel();
             }
@@ -305,111 +379,70 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-    @Override
-    public void onResume() {
-        super.onResume();  // Always call the superclass method first
-        Log.v(APP_TAG, "Starting onResume()...");
+//    @Override
+//    protected void onNewIntent(Intent intent) {
+//        if (ContactsContract.Intents.SEARCH_SUGGESTION_CLICKED.equals(intent.getAction())) {
+//            //handles suggestion clicked query
+//            String displayName = getDisplayNameForContact(intent);
+//            resultText.setText(displayName);
+//        } else if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+//            // handles a search query
+//            String query = intent.getStringExtra(SearchManager.QUERY);
+//        }
+//    }
 
-        getContacts();
 
-        try{
-            // Try and open / read from the CSV file.
-            OpenCSV();
-        } catch(Exception e) {
-            // Do stuff with the exception.
-            Log.v(APP_TAG, "Couldn't open CSV file!", e);
-        }
+    // Technically this just redoes the list view stuff.
+    // Don't really need this method if we're going to do it the lazy way.
+    public void updateListView() {
+        Log.v(APP_TAG, "Starting updateListView()...");
+        createAlerts();
     }
 
-
-    @Override
-    public void onPause() {
-        super.onPause();  // Always call the superclass method first
-
-        Log.v(APP_TAG, "Starting onPause()...");
-
-        // Call the SaveCSV function to save the map data to a CSV file.
-        try {
-            SaveCSV();
-        } catch(Exception e) {
-            // Write exception to logcat.
-            Log.v(APP_TAG, "Error! Couldn't save file to CSV!", e);
-        }
-    }
-
-    public void SaveCSV() throws Exception {
-        // Opening CSV file log.
-        Log.v(APP_TAG, "Starting SaveCSV()...");
-
-        // Get path for storing / accessing the CSV file.
-        String csv_path = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + CSV_FILE;
-
-        // Create an instance of the CSVWriter class. Give it the CSV file's name.
-        CSVWriter writer = new CSVWriter(new FileWriter(csv_path));
-
-        // While we've got a valid thing in the map.
-        for(Map.Entry<String, String> entry : alerts_list.entrySet()) {
-            // Now pair will have a key / value that we can save.
-            String key = entry.getKey();
-            String value = entry.getValue();
-            String next = key + "," + value;
-
-            String[] cur_alert = next.split(",");
-            writer.writeNext(cur_alert);
-        }
-
-        // Close the writer.
-        writer.close();
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
-
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
-
-        // Logcat, one for every function / method.
-        Log.v(APP_TAG, "Starting onCreate()...");
-
-        // ******************************************
-        //  Below this is the code for the ListView.
-        // ******************************************
-        createListView();
-
-        // Get the contact data into the ArrayList.
-        getContacts();
-
-        // ********************************
-        //  Below this is the button code.
-        // ********************************
-        addAlertButton = (Button) findViewById(R.id.AddAlertButton);
-        addAlertButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                AddAlert();
-            }
-        });
-
-        try{
-            // Try and open / read from the CSV file.
-            OpenCSV();
-        } catch(Exception e) {
-            // Do stuff with the exception.
-            Log.v(APP_TAG, "Couldn't open CSV file!", e);
-        }
-    }
 
     // Adds all the alerts to the list view.
     private void createAlerts() {
-        createListView();
+        Log.v("createListView", "Starting createListView()...");
+
+        // Get the list view from the XML file.
+        alert_list = (ListView) findViewById(R.id.listView);
+
+        // Onclick listener for the alerts.
+        alert_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Object obj = (alert_list.getItemAtPosition(position));
+
+
+                //Object obj = parent.getItemAtPosition(position);
+                HashMap<String, String> item = (HashMap<String, String>) obj;
+                String phoneNumber = "TEST";
+                String alert = "ALERT";
+
+                phoneNumber = item.get("phone_number");
+                alert = item.get("alert");
+
+                sendSMSMessage(phoneNumber, alert);
+            }
+        });
+
+        // Sort the alerts.
+        alerts_list = sortByKeys(alerts_list);
+
+        // Create a list of two items.
+        // One is the user's phone number.
+        // The other is the alert message.
+        list = buildData();
+
+        // From is a list of Key's.
+        // to is an array of IDs for the strings.
+        String[] from = {"phone_number", "alert"};
+        int[] to = {android.R.id.text1, android.R.id.text2};
+
+        // Simple adapter is all we need for this.
+        list_adapter = new SimpleAdapter(this, list, android.R.layout.simple_list_item_2, from, to);
+        alert_list.setAdapter(list_adapter);
     }
+
 
     // Adds all the user's contacts to the list view.
     private void createContacts() {
@@ -420,16 +453,17 @@ public class MainActivity extends ActionBarActivity
 
         // From is a list of Key's.
         // to is an array of IDs for the strings.
-        String[] from = { "name", "number" };
-        int[] to = { android.R.id.text1, android.R.id.text2 };
+        String[] from = {"name", "number"};
+        int[] to = {android.R.id.text1, android.R.id.text2};
 
         // Sort the contacts in order.
         Collections.sort(contactData, new MapComparator("name"));
 
         // Simple adapter is all we need for this.
         list_adapter = new SimpleAdapter(this, contactData, android.R.layout.simple_list_item_2, from, to);
-        alert_list.setAdapter(list_adapter);
+        contacts_list.setAdapter(list_adapter);
     }
+
 
     // Pulls data from the user's contacts book into the contacts map.
     public void getContacts() {
@@ -441,30 +475,32 @@ public class MainActivity extends ActionBarActivity
         // For now deal with just SMS messages so just one number per alert.
 
         contactData = new ArrayList<>();
-        Cursor cursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,null, null, null, null);
+        Cursor cursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
         while (cursor.moveToNext()) {
-            try{
+            try {
                 String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
                 String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
                 if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
-                    Cursor phones = getContentResolver().query( ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
-                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID +" = "+ contactId, null, null);
+                    Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId, null, null);
                     while (phones.moveToNext()) {
-                        String phoneNumber = phones.getString(phones.getColumnIndex( ContactsContract.CommonDataKinds.Phone.NUMBER));
-                        HashMap<String,String> map=new HashMap<>();
+                        String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                        HashMap<String, String> map = new HashMap<>();
                         map.put("name", name);
                         map.put("number", phoneNumber);
                         contactData.add(map);
                     }
                     phones.close();
                 }
-            }
-            catch(Exception e){
+            } catch (Exception e) {
 
             }
         }
+        cursor.close();
     }
 
+
+    // This is for the sidebar drawer
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
@@ -474,6 +510,8 @@ public class MainActivity extends ActionBarActivity
                 .commit();
     }
 
+
+    // This is for the sidebar drawer
     public void onSectionAttached(int number) {
         switch (number) {
             case 1:
@@ -487,7 +525,7 @@ public class MainActivity extends ActionBarActivity
                 createContacts();
                 break;
             case 3:
-                // This should load the about page.
+                // This loads the about page.
                 mTitle = getString(R.string.title_section3);
                 viewAbout();
                 break;
@@ -495,28 +533,19 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-    public void restoreActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+    // Launches the About activity
+    public void viewAbout() {
+        Log.v(APP_TAG, "Starting viewAbout()...");
+
+        // Launches a new activity.
+        Intent myIntent = new Intent(MainActivity.this, About.class);
+        //myIntent.putExtra("key", value); //Optional parameters
+        MainActivity.this.startActivity(myIntent);
     }
 
 
-    // Location related functions
-    private final LocationListener locationListener = new LocationListener() {
-        public void onLocationChanged(Location location) {
-            updateWithNewLocation(location);
-
-        }
-        public void onProviderDisabled(String provider) {}
-        public void onProviderEnabled(String provider) {}
-        public void onStatusChanged(String provider, int status,
-                                    Bundle extras) {}
-    };
-
-    private void updateWithNewLocation(Location location)
-    {
+    // Returns a location or something.
+    private void updateWithNewLocation(Location location) {
         String latLongString = "No location found";
         if (location != null) {
             double lat = location.getLatitude();
@@ -526,9 +555,13 @@ public class MainActivity extends ActionBarActivity
         Log.v("UML ALERTS", latLongString);
     }
 
+
     /**
-     *      Activity that sends an SMS message to a given phone number.
+     *      Method that sends an SMS message to a given phone number.
      *      Needs to have a phone number & message set to be successful.
+     *
+     *      In the future: multiple numbers will be separated by a "." and will send
+     *      separate SMS messages to those numbers.
      */
     protected void sendSMSMessage(final String _phoneNo, final String _message) {
         Log.i("Send SMS method", "");
@@ -553,7 +586,7 @@ public class MainActivity extends ActionBarActivity
                 // Get location - simplest way, all we want is lat and long!
                 LocationManager locationManager;
                 String svcName = Context.LOCATION_SERVICE;
-                locationManager = (LocationManager)getSystemService(svcName);
+                locationManager = (LocationManager) getSystemService(svcName);
 
                 Criteria criteria = new Criteria();
                 criteria.setAccuracy(Criteria.ACCURACY_FINE);
@@ -572,8 +605,7 @@ public class MainActivity extends ActionBarActivity
                 try {
                     latitude = location.getLatitude();
                     longitude = location.getLongitude();
-                }
-                catch (NullPointerException e){
+                } catch (NullPointerException e) {
                     Log.v("UML ALERTS", "Couldn't get location. :(", e);
                 }
 
@@ -594,7 +626,8 @@ public class MainActivity extends ActionBarActivity
                             Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 }
-            }});
+            }
+        });
         sms.setNegativeButton(android.R.string.no, null);
 
         AlertDialog dialog = sms.create();
@@ -617,11 +650,11 @@ public class MainActivity extends ActionBarActivity
 
 
     /**
-     *      Sets up the menu bar items.
-     *      Adds:
-     *      1) Alerts link
-     *      2) Contacts link
-     *      3) About link
+     * Sets up the menu bar items.
+     * Adds:
+     * 1) Alerts link
+     * 2) Contacts link
+     * 3) About link
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -630,12 +663,8 @@ public class MainActivity extends ActionBarActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
-        return super.onOptionsItemSelected(item);
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
     /**
@@ -678,17 +707,24 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    // Launches the About activity
-    public void viewAbout() {
-        Log.v(APP_TAG, "Starting viewAbout()...");
 
-        // Launches a new activity.
-        Intent myIntent = new Intent(MainActivity.this, About.class);
-        //myIntent.putExtra("key", value); //Optional parameters
-        MainActivity.this.startActivity(myIntent);
+    // Sorts a HashMap
+    public static <K extends Comparable, V extends Comparable> Map<K, V> sortByKeys(Map<K, V> map) {
+        List<K> keys = new LinkedList<K>(map.keySet());
+        Collections.sort(keys);
+
+        //LinkedHashMap will keep the keys in the order they are inserted
+        //which is currently sorted on natural ordering
+        Map<K, V> sortedMap = new LinkedHashMap<>();
+        for (K key : keys) {
+            sortedMap.put(key, map.get(key));
+        }
+
+        return sortedMap;
     }
 }
 
+// Used by the sort HashMap function above.
 class MapComparator implements Comparator<Map<String, String>> {
     private final String key;
 
