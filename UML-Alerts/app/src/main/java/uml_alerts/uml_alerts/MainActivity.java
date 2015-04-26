@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -81,7 +82,7 @@ public class MainActivity extends ActionBarActivity
     // Map for the contacts
     // Key: Name
     // Value: Phone Number
-    ArrayList<HashMap<String, String>> contactData;
+    List<HashMap<String, String>> contactData;
 
     // ListView to display the alerts.
     ListView alert_list;
@@ -93,7 +94,7 @@ public class MainActivity extends ActionBarActivity
     SimpleAdapter list_adapter;
 
     // ArrayList for the ListView
-    ArrayList<Map<String, String>> list;
+    List<Map<String, String>> list;
 
     // Add Alert button
     Button addAlertButton;
@@ -319,19 +320,46 @@ public class MainActivity extends ActionBarActivity
 
         // Long click listener for deleting alerts
         alert_list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                // Get the phone number(s) from the ListView
-                Object obj = (alert_list.getItemAtPosition(position));
-                HashMap<String, String> item = (HashMap<String, String>) obj;
-                String phoneNumber = item.get("phone_number");
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
 
-                Log.v("Deleting phone number: ", phoneNumber);
+                // Make a popup to confirm if the user actually wants to delete this alert.
+                AlertDialog.Builder deleteAlert = new AlertDialog.Builder(MainActivity.this);
 
-                // Delete the alert from the map.
-                alerts_list.values().removeAll(Collections.singleton(phoneNumber));
+                deleteAlert.setMessage("Remove this alert?");
+                deleteAlert.setPositiveButton("DELETE", new AlertDialog.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Get the phone number(s) from the ListView
+                        Object obj = (alert_list.getItemAtPosition(position));
+                        HashMap<String, String> item = (HashMap<String, String>) obj;
+                        String phoneNumber = item.get("phone_number");
 
-                // Redraw the ListView
-                createAlerts();
+                        Log.v("Deleting phone number: ", phoneNumber);
+
+                        // Delete the alert from the map.
+                        for(Iterator<Map.Entry<String, String>> it = alerts_list.entrySet().iterator(); it.hasNext(); ) {
+                            Map.Entry<String, String> entry = it.next();
+
+                            // Only remove the alert with the matching phone number!
+                            if (entry.getValue().equals(phoneNumber)) {
+                                it.remove();
+                            }
+                        }
+
+                        // Now refresh the ListView's adapter.
+                        alerts_list.remove(phoneNumber);
+                        list_adapter.notifyDataSetChanged();
+                        createAlerts();
+                    }
+
+                }).setNegativeButton("CANCEL", new AlertDialog.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Does nothing but cancel the delete alert.
+                    }
+                });
+
+                // Display the dialog.
+                deleteAlert.show();
+
                 return false;
             }
         });
@@ -385,7 +413,6 @@ public class MainActivity extends ActionBarActivity
                 AddContact();
             }
         });
-
 
         // From is a list of Key's.
         // to is an array of IDs for the strings.
@@ -443,8 +470,6 @@ public class MainActivity extends ActionBarActivity
 
         // Text entry dialog.
         AlertDialog.Builder text_entry = new AlertDialog.Builder(this);
-
-        String result_number;
 
         TextView Title = new TextView(this);
         Title.setText("Add New Alert");
@@ -504,12 +529,8 @@ public class MainActivity extends ActionBarActivity
                     if (checked.valueAt(i)) {
                         Object obj = (contact_list.getItemAtPosition(position));
 
-
-                        //Object obj = parent.getItemAtPosition(position);
                         HashMap<String, String> item = (HashMap<String, String>) obj;
-                        //String name = item.get("name");
                         String phoneNumber = item.get("number");
-//                        String contact = name + " " + phoneNumber;
 
                         // Add the current number to the ArrayList.
                         selectedItems.add(phoneNumber); //contact);
@@ -523,7 +544,6 @@ public class MainActivity extends ActionBarActivity
                     builder.append(val).append("\n");
                 }
                 mPhone = builder.toString();
-
                 mMessage = msg_input.getText().toString();
 
                 // Add the phone number / message to the map of alerts.
