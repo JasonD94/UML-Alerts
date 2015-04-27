@@ -52,8 +52,12 @@ import java.util.Set;
 
 
 /**
- *      At the current point in time, there are no known bugs in this code.
- *      There may be random glitches though - further testing is required.
+ *      Known Bugs to work out:
+ *      1. Title doesn't change, only in the Google Maps view.
+ *      2. Google Maps view takes a while to load - should optimize this.
+ *          ACTUALLY, this may be due to slow networks - should test at different spots
+ *          to rule out wifi / data signal problems
+ *      3. Disable location found notification on G3 - annoying that it stays around forever.
  *
  */
 
@@ -64,7 +68,7 @@ public class MainActivity extends ActionBarActivity
     // Used to store the last screen title. For use in {@link #restoreActionBar()}.
     private CharSequence mTitle;
 
-    // Nagivation bar variable stored here.
+    // Navigation bar variable stored here.
     NavigationDrawerFragment mNavigationDrawerFragment;
 
     // Google Maps base URL
@@ -191,22 +195,26 @@ public class MainActivity extends ActionBarActivity
             // Loads the Alerts screen
             case 0:
                 mNavigationDrawerFragment.selectItem(0);
+                mTitle = getString(R.string.title_section1);
                 break;
 
             // Loads the Contacts screen
             case 1:
                 mNavigationDrawerFragment.selectItem(1);
+                mTitle = getString(R.string.title_section2);
                 break;
 
             // Loads the Previous Alerts screen.
             case 2:
                 mNavigationDrawerFragment.selectItem(2);
+                mTitle = getString(R.string.title_section3);
                 break;
 
                 // on default, load Alerts view. Ex: User first opens app.
             default:
                 // Loads the ListView up with alerts.
                 mNavigationDrawerFragment.selectItem(0);
+                mTitle = getString(R.string.title_section1);
                 createAlerts();
 
                 addAlertButton = (Button) findViewById(R.id.AddAlertButton);
@@ -1010,8 +1018,9 @@ public class MainActivity extends ActionBarActivity
      * Adds:
      * 1) Alerts link
      * 2) Contacts link
-     * 3) Google Maps link
-     * 4) About link
+     * 3) Previous Alerts link
+     * 4) Google Maps link
+     * 5) About link
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
