@@ -2,6 +2,7 @@ package uml_alerts.uml_alerts;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -70,6 +71,11 @@ public class MainActivity extends ActionBarActivity
     // Value: Phone Number
     List<HashMap<String, String>> contactData;
 
+    // Map for the previous alerts
+    // Key: Alert time
+    // Value: Lat / Long location
+    Map<String, String> alerts_map = new HashMap<>();
+
     // ListView to display the alerts.
     ListView alert_list;
 
@@ -92,6 +98,8 @@ public class MainActivity extends ActionBarActivity
     // Location Manager.
     GPSTracker gps;
 
+    // Progress bar for the contact loading.
+    protected ProgressDialog mProgressDialog;
 
     /**
      *      Android related methods are at the top.
@@ -117,9 +125,6 @@ public class MainActivity extends ActionBarActivity
 
         // Loads the ListView up with alerts.
         createAlerts();
-
-        // Get the contact data into the ArrayList.
-        getContacts();
 
         // ********************************
         //  Below this is the button code.
@@ -155,6 +160,9 @@ public class MainActivity extends ActionBarActivity
             // Ask user to enable GPS/network in settings
             gps.showSettingsAlert();
         }
+
+        // Get the contact data into the ArrayList.
+        getContacts();
     }
 
 
@@ -235,11 +243,25 @@ public class MainActivity extends ActionBarActivity
                 createContacts();
                 break;
             case 3:
-                // This loads the about page.
+                // This sets up the google maps view.
                 mTitle = getString(R.string.title_section3);
+                launchMaps();
+                break;
+            case 4:
+                // This loads the about page.
+                mTitle = getString(R.string.title_section4);
                 viewAbout();
                 break;
         }
+    }
+
+
+    public void launchMaps() {
+        Log.v(APP_TAG, "Starting Google Maps View...");
+
+        // Launches a new activity.
+        Intent myIntent = new Intent(MainActivity.this, GoogleMaps.class);
+        startActivity(myIntent);
     }
 
 
@@ -249,7 +271,6 @@ public class MainActivity extends ActionBarActivity
 
         // Launches a new activity.
         Intent myIntent = new Intent(MainActivity.this, About.class);
-        //myIntent.putExtra("key", value); //Optional parameters
         MainActivity.this.startActivity(myIntent);
     }
 
@@ -280,11 +301,11 @@ public class MainActivity extends ActionBarActivity
             String value = container.get(1);
 
             // Debugging
-            Log.v(APP_TAG, "Key is: ");
-            Log.v(APP_TAG, key);
-
-            Log.v(APP_TAG, "Value is: ");
-            Log.v(APP_TAG, value);
+//            Log.v(APP_TAG, "Key is: ");
+//            Log.v(APP_TAG, key);
+//
+//            Log.v(APP_TAG, "Value is: ");
+//            Log.v(APP_TAG, value);
 
             // Add to the map.
             alerts_list.put(key, value);
@@ -616,14 +637,23 @@ public class MainActivity extends ActionBarActivity
 
 
     // Pulls data from the user's contacts book into the contacts map.
+    // This runs in a new thread, to avoid slowing down the UI.
     public void getContacts() {
         Log.v("getContacts()", "Starting getContacts()...");
 
-        // This code is for displaying contacts.
-        // We should in fact search through contacts and save their number in the map instead.
-        // May need to make an array of numbers though if more than one.
-        // For now deal with just SMS messages so just one number per alert.
+        new Thread() {
+            @Override
+            public void run() {
+                getContactsInBackground();
+            }
+        }.start();
+    }
 
+    // This code is for displaying contacts.
+    // We should in fact search through contacts and save their number in the map instead.
+    // May need to make an array of numbers though if more than one.
+    // For now deal with just SMS messages so just one number per alert.
+    public void getContactsInBackground() {
         contactData = new ArrayList<>();
         Cursor cursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
         while (cursor.moveToNext()) {
@@ -646,6 +676,7 @@ public class MainActivity extends ActionBarActivity
                 e.printStackTrace();
             }
         }
+
         cursor.close();
     }
 
@@ -769,7 +800,8 @@ public class MainActivity extends ActionBarActivity
      * Adds:
      * 1) Alerts link
      * 2) Contacts link
-     * 3) About link
+     * 3) Google Maps link
+     * 4) About link
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -777,10 +809,9 @@ public class MainActivity extends ActionBarActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-
         return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
+
 
     /**
      * A placeholder fragment containing a simple view.
@@ -817,8 +848,7 @@ public class MainActivity extends ActionBarActivity
         @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
-            ((MainActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
+            ((MainActivity) activity).onSectionAttached(getArguments().getInt(ARG_SECTION_NUMBER));
         }
     }
 

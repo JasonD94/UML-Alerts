@@ -34,23 +34,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Alerts"
-            android:label="@string/title_activity_alerts"
-            android:screenOrientation="portrait" >
-        </activity>
-        <activity
-            android:name=".Contacts"
-            android:label="@string/title_activity_contacts"
+            android:name=".GoogleMaps"
+            android:label="@string/title_activity_maps"
             android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name=".About"
             android:label="@string/title_activity_about"
-            android:screenOrientation="portrait" >
-        </activity>
-        <activity
-            android:name=".OtherSettings"
-            android:label="@string/title_activity_other_settings"
             android:screenOrientation="portrait" >
         </activity>
 
@@ -59,6 +49,14 @@
             android:enabled="true"
             android:exported="true" >
         </service>
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyB-TVrA7aGx6TpNPrZrYA1goAVT1C0Px_A" />
     </application>
 
 </manifest>
