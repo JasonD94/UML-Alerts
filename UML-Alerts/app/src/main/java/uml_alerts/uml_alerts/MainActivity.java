@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.location.Location;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
@@ -45,15 +44,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- * TODO:
- *
- *      - Fix location.
- *      - Overall design fixes
- *      - Make screen capture demoing the app
- *
- */
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -107,8 +97,6 @@ public class MainActivity extends ActionBarActivity
      *      Android related methods are at the top.
      *      Other app related methods are below the Android stuff.
      */
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -157,8 +145,10 @@ public class MainActivity extends ActionBarActivity
             double latitude = gps.getLatitude();
             double longitude = gps.getLongitude();
 
-            // \n is for new line
-            Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
+            // Show location to logcat.
+//            Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
+            Log.v("onCreate()", "Your Location is - \nLat: " + latitude + "\nLong: " + longitude);
+
         }else{
             // can't get location
             // GPS or Network is not enabled
@@ -181,6 +171,9 @@ public class MainActivity extends ActionBarActivity
             // Write exception to logcat.
             Log.v(APP_TAG, "Error! Couldn't save file to CSV!", e);
         }
+
+        // Stop listening to the location.
+        gps.stopUsingGPS();
     }
 
 
@@ -198,6 +191,66 @@ public class MainActivity extends ActionBarActivity
             // Do stuff with the exception.
             Log.v(APP_TAG, "Couldn't open CSV file!", e);
         }
+
+        // Update the location.
+        if(gps.canGetLocation()) {
+            double latitude = gps.getLatitude();
+            double longitude = gps.getLongitude();
+
+            // Show location to logcat.
+//            Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
+            Log.v("onCreate()", "Your Location is - \nLat: " + latitude + "\nLong: " + longitude);
+
+        }else{
+            // can't get location
+            // GPS or Network is not enabled
+            // Ask user to enable GPS/network in settings
+            gps.showSettingsAlert();
+        }
+    }
+
+
+    // This is for the sidebar drawer
+    @Override
+    public void onNavigationDrawerItemSelected(int position) {
+        // update the main content by replacing fragments
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                .commit();
+    }
+
+
+    // This is for the sidebar drawer
+    public void onSectionAttached(int number) {
+        switch (number) {
+            case 1:
+                // This sets up the alerts view.
+                mTitle = getString(R.string.title_section1);
+                createAlerts();
+                break;
+            case 2:
+                // This sets up the contacts view.
+                mTitle = getString(R.string.title_section2);
+                createContacts();
+                break;
+            case 3:
+                // This loads the about page.
+                mTitle = getString(R.string.title_section3);
+                viewAbout();
+                break;
+        }
+    }
+
+
+    // Launches the About activity
+    public void viewAbout() {
+        Log.v(APP_TAG, "Starting viewAbout()...");
+
+        // Launches a new activity.
+        Intent myIntent = new Intent(MainActivity.this, About.class);
+        //myIntent.putExtra("key", value); //Optional parameters
+        MainActivity.this.startActivity(myIntent);
     }
 
 
@@ -322,11 +375,8 @@ public class MainActivity extends ActionBarActivity
                 // Get the phone number(s) and the alert from the ListView
                 Object obj = (alert_list.getItemAtPosition(position));
                 HashMap<String, String> item = (HashMap<String, String>) obj;
-                String phoneNumber = "TEST";
-                String alert = "ALERT";
-
-                phoneNumber = item.get("phone_number");
-                alert = item.get("alert");
+                String phoneNumber = item.get("phone_number");
+                String alert = item.get("alert");
 
                 sendSMSMessage(phoneNumber, alert);
             }
@@ -405,78 +455,6 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-    // Adds all the user's contacts to the list view.
-    private void createContacts() {
-        Log.v("createContacts", "Starting createContacts()...");
-
-        // Get the list view from the XML file.
-        contacts_list = (ListView) findViewById(R.id.listView);
-
-        // Onclick listener for the contacts
-        contacts_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // This does nothing because it shouldn't do anything at all.
-            }
-        });
-
-        // Make the "add new alert button" actually just pop up the add new contact page.
-        // Setup the Add alerts button.
-        addAlertButton = (Button) findViewById(R.id.AddAlertButton);
-        addAlertButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                AddContact();
-            }
-        });
-
-        // From is a list of Key's.
-        // to is an array of IDs for the strings.
-        String[] from = {"name", "number"};
-        int[] to = {android.R.id.text1, android.R.id.text2};
-
-        // Sort the contacts in order.
-        Collections.sort(contactData, new MapComparator("name"));
-
-        // Simple adapter is all we need for this.
-        list_adapter = new SimpleAdapter(this, contactData, android.R.layout.simple_list_item_2, from, to);
-        contacts_list.setAdapter(list_adapter);
-    }
-
-
-    // Pulls data from the user's contacts book into the contacts map.
-    public void getContacts() {
-        Log.v("getContacts()", "Starting getContacts()...");
-
-        // This code is for displaying contacts.
-        // We should in fact search through contacts and save their number in the map instead.
-        // May need to make an array of numbers though if more than one.
-        // For now deal with just SMS messages so just one number per alert.
-
-        contactData = new ArrayList<>();
-        Cursor cursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
-        while (cursor.moveToNext()) {
-            try {
-                String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
-                    Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
-                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId, null, null);
-                    while (phones.moveToNext()) {
-                        String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                        HashMap<String, String> map = new HashMap<>();
-                        map.put("name", name);
-                        map.put("number", phoneNumber);
-                        contactData.add(map);
-                    }
-                    phones.close();
-                }
-            } catch (Exception e) {
-
-            }
-        }
-        cursor.close();
-    }
-
-
     // This alerts an alert to the map, and onPause saves the map data to a csv file.
     // Makes a simple alert dialog with its own view stuff.
     public void AddAlert() {
@@ -518,7 +496,7 @@ public class MainActivity extends ActionBarActivity
         // Get the message
         final EditText msg_input = new EditText(this);
         msg_input.setHint("Enter your message here.");
-        msg_input.setGravity(Gravity.LEFT);
+        msg_input.setGravity(Gravity.START);
 
         // Create a layout for the title, about and two input strings.
         LinearLayout lay = new LinearLayout(this);
@@ -586,6 +564,47 @@ public class MainActivity extends ActionBarActivity
 
         // Display the dialog
         text_entry.show();
+
+        // Get a location update whenever alerts are added or sent.
+        gps.getLocation();
+    }
+
+
+
+    // Adds all the user's contacts to the list view.
+    private void createContacts() {
+        Log.v("createContacts", "Starting createContacts()...");
+
+        // Get the list view from the XML file.
+        contacts_list = (ListView) findViewById(R.id.listView);
+
+        // Onclick listener for the contacts
+        contacts_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // This does nothing because it shouldn't do anything at all.
+            }
+        });
+
+        // Make the "add new alert button" actually just pop up the add new contact page.
+        // Setup the Add alerts button.
+        addAlertButton = (Button) findViewById(R.id.AddAlertButton);
+        addAlertButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                AddContact();
+            }
+        });
+
+        // From is a list of Key's.
+        // to is an array of IDs for the strings.
+        String[] from = {"name", "number"};
+        int[] to = {android.R.id.text1, android.R.id.text2};
+
+        // Sort the contacts in order.
+        Collections.sort(contactData, new MapComparator("name"));
+
+        // Simple adapter is all we need for this.
+        list_adapter = new SimpleAdapter(this, contactData, android.R.layout.simple_list_item_2, from, to);
+        contacts_list.setAdapter(list_adapter);
     }
 
 
@@ -596,59 +615,38 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-    // This is for the sidebar drawer
-    @Override
-    public void onNavigationDrawerItemSelected(int position) {
-        // update the main content by replacing fragments
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();
-    }
+    // Pulls data from the user's contacts book into the contacts map.
+    public void getContacts() {
+        Log.v("getContacts()", "Starting getContacts()...");
 
+        // This code is for displaying contacts.
+        // We should in fact search through contacts and save their number in the map instead.
+        // May need to make an array of numbers though if more than one.
+        // For now deal with just SMS messages so just one number per alert.
 
-    // This is for the sidebar drawer
-    public void onSectionAttached(int number) {
-        switch (number) {
-            case 1:
-                // This sets up the alerts view.
-                mTitle = getString(R.string.title_section1);
-                createAlerts();
-                break;
-            case 2:
-                // This sets up the contacts view.
-                mTitle = getString(R.string.title_section2);
-                createContacts();
-                break;
-            case 3:
-                // This loads the about page.
-                mTitle = getString(R.string.title_section3);
-                viewAbout();
-                break;
+        contactData = new ArrayList<>();
+        Cursor cursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+        while (cursor.moveToNext()) {
+            try {
+                String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
+                    Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId, null, null);
+                    while (phones.moveToNext()) {
+                        String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("name", name);
+                        map.put("number", phoneNumber);
+                        contactData.add(map);
+                    }
+                    phones.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-    }
-
-
-    // Launches the About activity
-    public void viewAbout() {
-        Log.v(APP_TAG, "Starting viewAbout()...");
-
-        // Launches a new activity.
-        Intent myIntent = new Intent(MainActivity.this, About.class);
-        //myIntent.putExtra("key", value); //Optional parameters
-        MainActivity.this.startActivity(myIntent);
-    }
-
-
-    // Returns a location or something.
-    private void updateWithNewLocation(Location location) {
-        String latLongString = "No location found";
-        if (location != null) {
-            double lat = location.getLatitude();
-            double lng = location.getLongitude();
-            latLongString = "Lat:" + lat + "\nLong:" + lng;
-        }
-        Log.v("UML ALERTS", latLongString);
+        cursor.close();
     }
 
 
@@ -666,7 +664,19 @@ public class MainActivity extends ActionBarActivity
      *      Name / Numbers are separated by five space characters.
      */
     protected void sendSMSMessage(final String _phoneNo, final String _message) {
-        Log.i("Send SMS method", "");
+        Log.i("sendSMSMessage()", "Starting to send the SMS message...");
+
+        // Get a location update whenever alerts are added or sent.
+        // In this case it is critical to start grabbing an updated location as soon as the user
+        // press on the ListView, as if they click "Yes", they will want an updated location and
+        // not an old one!
+        if(gps.canGetLocation()) {
+            gps.getLocation();
+        } else {
+            // We can't get a location, as GPS or Network is not enabled
+            // Ask user to enable GPS/Network in settings
+            gps.showSettingsAlert();
+        }
 
         AlertDialog.Builder sms = new AlertDialog.Builder(this);
         sms.setTitle("Send the message?");
@@ -693,12 +703,6 @@ public class MainActivity extends ActionBarActivity
                     String message = _message;
 
                     Log.v("Sending SMS Alert to: ", phoneNo);
-
-                    /**
-                     *      THE LOCATION STUFF HERE IS PROBABLY BROKEN,
-                     *      USE UDIT'S FIXED LOCATION STUFF...
-                     *
-                     */
 
                     // Append a google maps URL to the message with a set location (for now)
                     // Pre-set to Olsen Hall, or 42.654802, -71.326363
@@ -741,19 +745,23 @@ public class MainActivity extends ActionBarActivity
         dialog.show();
     }
 
-    // Adds options to the menu at the top of the app.
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-//            // Only show items in the action bar relevant to this screen
-//            // if the drawer is not showing. Otherwise, let the drawer
-//            // decide what to show in the action bar.
-//            getMenuInflater().inflate(R.menu.main, menu);
-//            restoreActionBar();
-//            return true;
-//        }
-//        return super.onCreateOptionsMenu(menu);
-//    }
+    /** Adds options to the menu at the top of the app.
+     * This currently isn't used, so it is commented out for now.
+     */
+    /*
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (!mNavigationDrawerFragment.isDrawerOpen()) {
+            // Only show items in the action bar relevant to this screen
+            // if the drawer is not showing. Otherwise, let the drawer
+            // decide what to show in the action bar.
+            getMenuInflater().inflate(R.menu.main, menu);
+            restoreActionBar();
+            return true;
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+    */
 
 
     /**
@@ -817,7 +825,7 @@ public class MainActivity extends ActionBarActivity
 
     // Sorts a HashMap
     public static <K extends Comparable, V extends Comparable> Map<K, V> sortByKeys(Map<K, V> map) {
-        List<K> keys = new LinkedList<K>(map.keySet());
+        List<K> keys = new LinkedList<>(map.keySet());
         Collections.sort(keys);
 
         //LinkedHashMap will keep the keys in the order they are inserted

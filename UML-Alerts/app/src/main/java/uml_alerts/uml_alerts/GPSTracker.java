@@ -29,9 +29,9 @@ public class GPSTracker extends Service implements LocationListener {
     // flag for GPS status
     boolean canGetLocation = false;
 
-    Location location; // location
-    double latitude; // latitude
-    double longitude; // longitude
+    Location location;  // location
+    double latitude;    // latitude
+    double longitude;   // longitude
 
     // The minimum distance to change Updates in meters
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
@@ -111,7 +111,7 @@ public class GPSTracker extends Service implements LocationListener {
      * Stop using GPS listener
      * Calling this function will stop using GPS in your app
      * */
-    public void stopUsingGPS(){
+    public void stopUsingGPS() {
         if(locationManager != null){
             locationManager.removeUpdates(GPSTracker.this);
         }
@@ -151,7 +151,7 @@ public class GPSTracker extends Service implements LocationListener {
 
     /**
      * Function to show settings alert dialog
-     * On pressing Settings button will lauch Settings Options
+     * On pressing Settings button will launch Settings Options
      * */
     public void showSettingsAlert(){
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
