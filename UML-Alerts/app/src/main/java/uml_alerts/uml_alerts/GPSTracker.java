@@ -18,7 +18,7 @@ import android.util.Log;
 
 public class GPSTracker extends Service implements LocationListener {
 
-    private final Context mContext;
+    private static Context mContext;
 
     // flag for GPS status
     boolean isGPSEnabled = false;
@@ -41,6 +41,11 @@ public class GPSTracker extends Service implements LocationListener {
 
     // Declaring a Location Manager
     protected LocationManager locationManager;
+
+    public GPSTracker() {
+        // This does nothing.
+        // This is just here to tell Android Studio to shut up when I build APKs.
+    }
 
     public GPSTracker(Context context) {
         this.mContext = context;
