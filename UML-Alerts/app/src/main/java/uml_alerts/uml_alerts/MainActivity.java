@@ -53,7 +53,7 @@ import java.util.Set;
 
 /**
  *      Known Bugs to work out:
- *      1. Title doesn't change, only in the Google Maps view.
+ *      FIXED
  *      2. Google Maps view takes a while to load - should optimize this.
  *          ACTUALLY, this may be due to slow networks - should test at different spots
  *          to rule out wifi / data signal problems
@@ -135,7 +135,7 @@ public class MainActivity extends ActionBarActivity
         setContentView(R.layout.activity_main);
 
         // Logcat, one for every function / method.
-        Log.v(APP_TAG, "Starting onCreate()...");
+        Log.v(APP_TAG, "Starting onCreate() in MainActivity.java");
 
         /**
          *      Setup the location stuff.
@@ -164,7 +164,7 @@ public class MainActivity extends ActionBarActivity
             OpenCSV();
         } catch (Exception e) {
             // Do stuff with the exception.
-            Log.v(APP_TAG, "Couldn't open CSV file!", e);
+            Log.v(APP_TAG, "Couldn't open CSV file! In MainActivity.java", e);
         }
 
         // Get the contact data into the ArrayList.
@@ -189,7 +189,7 @@ public class MainActivity extends ActionBarActivity
             value = b.getInt("key");
         }
         catch(Exception e) {
-            Log.v("onCreate()", "Failed to get Int from Bundle.");
+            Log.v("onCreate()", "Failed to get Int from Bundle. In MainActivity.java");
             value = 0;      // Set default value.
         }
 
@@ -199,18 +199,21 @@ public class MainActivity extends ActionBarActivity
             case 0:
                 mNavigationDrawerFragment.selectItem(0);
                 mTitle = getString(R.string.title_section1);
+                mNavigationDrawerFragment.changeTitle(mTitle);
                 break;
 
             // Loads the Contacts screen
             case 1:
                 mNavigationDrawerFragment.selectItem(1);
                 mTitle = getString(R.string.title_section2);
+                mNavigationDrawerFragment.changeTitle(mTitle);
                 break;
 
             // Loads the Previous Alerts screen.
             case 2:
                 mNavigationDrawerFragment.selectItem(2);
                 mTitle = getString(R.string.title_section3);
+                mNavigationDrawerFragment.changeTitle(mTitle);
                 break;
 
                 // on default, load Alerts view. Ex: User first opens app.
@@ -218,6 +221,7 @@ public class MainActivity extends ActionBarActivity
                 // Loads the ListView up with alerts.
                 mNavigationDrawerFragment.selectItem(0);
                 mTitle = getString(R.string.title_section1);
+                mNavigationDrawerFragment.changeTitle(mTitle);
                 createAlerts();
 
                 addAlertButton = (Button) findViewById(R.id.AddAlertButton);
@@ -235,14 +239,14 @@ public class MainActivity extends ActionBarActivity
     public void onPause() {
         super.onPause();  // Always call the superclass method first
 
-        Log.v(APP_TAG, "Starting onPause()...");
+        Log.v(APP_TAG, "Starting onPause()...In MainActivity.java");
 
         // Call the SaveCSV function to save the map data to a CSV file.
         try {
             SaveCSV();
         } catch (Exception e) {
             // Write exception to logcat.
-            Log.v(APP_TAG, "Error! Couldn't save file to CSV!", e);
+            Log.v(APP_TAG, "Error! Couldn't save file to CSV! In MainActivity.java", e);
         }
 
         // Stop listening to the location.
@@ -253,17 +257,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onResume() {
         super.onResume();  // Always call the superclass method first
-        Log.v(APP_TAG, "Starting onResume()...");
-
-//        getContacts();
-//
-//        try {
-//            // Try and open / read from the CSV file.
-//            OpenCSV();
-//        } catch (Exception e) {
-//            // Do stuff with the exception.
-//            Log.v(APP_TAG, "Couldn't open CSV file!", e);
-//        }
+        Log.v(APP_TAG, "Starting onResume()...In MainActivity.java");
 
         // Update the location.
         if(gps.canGetLocation()) {
@@ -299,26 +293,31 @@ public class MainActivity extends ActionBarActivity
             case 1:
                 // This sets up the alerts view.
                 mTitle = getString(R.string.title_section1);
+                mNavigationDrawerFragment.changeTitle(mTitle);
                 createAlerts();
                 break;
             case 2:
                 // This sets up the contacts view.
                 mTitle = getString(R.string.title_section2);
+                mNavigationDrawerFragment.changeTitle(mTitle);
                 createContacts();
                 break;
             case 3:
                 // This sets up the previous alerts view
                 mTitle = getString(R.string.title_section3);
+                mNavigationDrawerFragment.changeTitle(mTitle);
                 createPreviousAlerts();
                 break;
             case 4:
                 // This sets up the google maps view.
                 mTitle = getString(R.string.title_section4);
+                mNavigationDrawerFragment.changeTitle(mTitle);
                 launchMaps();
                 break;
             case 5:
                 // This loads the about page.
                 mTitle = getString(R.string.title_section5);
+                mNavigationDrawerFragment.changeTitle(mTitle);
                 viewAbout();
                 break;
         }
@@ -326,7 +325,7 @@ public class MainActivity extends ActionBarActivity
 
 
     public void launchMaps() {
-        Log.v(APP_TAG, "Starting Google Maps View...");
+        Log.v(APP_TAG, "Starting Google Maps View...In MainActivity.java");
 
         // Launches a new activity.
         Intent myIntent = new Intent(MainActivity.this, GoogleMaps.class);
@@ -344,7 +343,7 @@ public class MainActivity extends ActionBarActivity
 
     // Launches the About activity
     public void viewAbout() {
-        Log.v(APP_TAG, "Starting viewAbout()...");
+        Log.v(APP_TAG, "Starting viewAbout()...In MainActivity.java");
 
         // Launches a new activity.
         Intent myIntent = new Intent(MainActivity.this, About.class);
@@ -360,7 +359,7 @@ public class MainActivity extends ActionBarActivity
     // Open data from a CSV file, save to the map.
     public void OpenCSV() throws Exception {
         // Opening CSV file log.
-        Log.v(APP_TAG, "Starting OpenCSV()...");
+        Log.v(APP_TAG, "Starting OpenCSV()...In MainActivity.java");
 
         // The first part opens the alerts data from a CSV file called "alerts.csv"
         // Get path for storing / accessing the CSV file.
@@ -412,8 +411,8 @@ public class MainActivity extends ActionBarActivity
             String value = container.get(1);
 
             // Debugging
-            Log.v("Key is: ", key);
-            Log.v("Value is: ", value);
+//            Log.v("Key is: ", key);
+//            Log.v("Value is: ", value);
 
             HashMap<String, String> map = new HashMap<>();
             map.put("date", key);
@@ -440,7 +439,7 @@ public class MainActivity extends ActionBarActivity
     // Read from CSV file into local map variable.
     public void SaveCSV() throws Exception {
         // Opening CSV file log.
-        Log.v(APP_TAG, "Starting SaveCSV()...");
+        Log.v(APP_TAG, "Starting SaveCSV()...In MainActivity.java");
 
         // The first part saves the alerts data to a CSV file called "alerts.csv"
         // Get path for storing / accessing the CSV file.
@@ -479,7 +478,8 @@ public class MainActivity extends ActionBarActivity
             location = tmpData.get("location");
             String next = date + "," + location;
 
-            Log.v("Testing current pair: ", next);
+            // Old Debugging Log.
+            //Log.v("Testing current pair: ", next);
 
             String[] cur_alert = next.split(",");
             writer.writeNext(cur_alert);
@@ -494,7 +494,7 @@ public class MainActivity extends ActionBarActivity
     private ArrayList<Map<String, String>> buildData() {
         // This will at some point pull from the alerts_list map!
         // For now it is hard coded for testing purposes.
-        Log.v(APP_TAG, "Starting buildData()...");
+        Log.v(APP_TAG, "Starting buildData()...In MainActivity.java");
 
         ArrayList<Map<String, String>> tmp_list = new ArrayList<>();
 
@@ -509,7 +509,7 @@ public class MainActivity extends ActionBarActivity
     // This is used by the above buildData as a helper method to generate the ArrayList
     // from the alerts map.
     private HashMap<String, String> putData(String phone_number, String alert) {
-        Log.v(APP_TAG, "Starting putData()...");
+        Log.v(APP_TAG, "Starting putData()...In MainActivity.java");
 
         HashMap<String, String> item = new HashMap<>();
         item.put("phone_number", phone_number);
@@ -521,14 +521,14 @@ public class MainActivity extends ActionBarActivity
     // Technically this just redoes the list view stuff.
     // Don't really need this method if we're going to do it the lazy way.
     public void updateListView() {
-        Log.v(APP_TAG, "Starting updateListView()...");
+        Log.v(APP_TAG, "Starting updateListView()...In MainActivity.java");
         createAlerts();
     }
 
 
     // Adds all the alerts to the list view.
     private void createAlerts() {
-        Log.v("createListView", "Starting createListView()...");
+        Log.v("createListView", "Starting createListView()...In MainActivity.java");
 
         // Get the list view from the XML file.
         alert_list = (ListView) findViewById(R.id.listView);
@@ -746,7 +746,7 @@ public class MainActivity extends ActionBarActivity
 
     // Adds all the user's contacts to the list view.
     private void createContacts() {
-        Log.v("createContacts", "Starting createContacts()...");
+        Log.v("createContacts", "Starting createContacts()...In MainActivity.java");
 
         // Get the list view from the XML file.
         contacts_list = (ListView) findViewById(R.id.listView);
@@ -782,7 +782,7 @@ public class MainActivity extends ActionBarActivity
 
 
     public void createPreviousAlerts() {
-        Log.v("createPreviousAlerts", "Starting createPreviousAlerts()...");
+        Log.v("createPreviousAlerts", "Starting createPreviousAlerts()...In MainActivity.java");
 
         // Get the list view from the XML file.
         previous_list = (ListView) findViewById(R.id.listView);
@@ -816,7 +816,7 @@ public class MainActivity extends ActionBarActivity
         }
         catch(Exception e) {
             // Do stuff with the exception.
-            Log.v(APP_TAG, "Couldn't view previous alerts!", e);
+            Log.v(APP_TAG, "Couldn't view previous alerts! In MainActivity.java", e);
 
             new AlertDialog.Builder(MainActivity.this)
                     .setTitle("No Previous Alerts")
@@ -841,7 +841,7 @@ public class MainActivity extends ActionBarActivity
     // Pulls data from the user's contacts book into the contacts map.
     // This runs in a new thread, to avoid slowing down the UI.
     public void getContacts() {
-        Log.v("getContacts()", "Starting getContacts()...");
+        Log.v("getContacts()", "Starting getContacts()...In MainActivity.java");
 
         new Thread() {
             @Override
@@ -931,7 +931,7 @@ public class MainActivity extends ActionBarActivity
                 String location = Double.toString(latitude) + "," + Double.toString(longitude);
 
                 for(String num : numbers) {
-                    Log.v("Sending SMS Alert to: ", num);
+                    //Log.v("Sending SMS Alert to: ", num);
 
                     // Note - we now need to separate the String "num" as we just want
                     // the contacts number, not there name! These are separated by two spaces ("  ")
@@ -940,7 +940,7 @@ public class MainActivity extends ActionBarActivity
                     String phoneNo = parts[1];
                     String message = _message;
 
-                    Log.v("Sending SMS Alert to: ", phoneNo);
+                    //Log.v("Sending SMS Alert to: ", phoneNo);
 
                     // Get the current location.
                     if(gps.canGetLocation()) {

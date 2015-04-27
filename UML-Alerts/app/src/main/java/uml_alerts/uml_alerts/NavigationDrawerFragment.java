@@ -237,8 +237,13 @@ public class NavigationDrawerFragment extends Fragment {
         // If the drawer is open, show the global app actions in the action bar. See also
         // showGlobalContextActionBar, which controls the top-left area of the action bar.
         if (mDrawerLayout != null && isDrawerOpen()) {
-            inflater.inflate(R.menu.global, menu);
-            showGlobalContextActionBar();
+            /**
+             *      THIS IS DISABLED BECAUSE I DO NOT WANT THE GLOBAL ACTION BAR ON THE TOP RIGHT
+             *      WHEN USERS ARE IN THE NAVIGATION MENU.
+             *
+             */
+//            inflater.inflate(R.menu.global, menu);
+//            showGlobalContextActionBar();
         }
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -255,6 +260,18 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+
+    /**
+     *          I ADDED THIS METHOD TO CHANGE THE TITLE
+     *          I DON'T KNOW WHY THE TITLE WON'T EVER CHANGE.
+     *
+     * */
+
+    void changeTitle(CharSequence Title) {
+        ActionBar actionBar = getActionBar();
+        actionBar.setTitle(Title);
     }
 
     /**

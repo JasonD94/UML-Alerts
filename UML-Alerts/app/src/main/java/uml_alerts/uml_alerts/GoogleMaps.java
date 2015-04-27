@@ -66,7 +66,7 @@ public class GoogleMaps extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.google_maps);
 
-        Log.v("onCreate()", "Starting onCreate()");
+        Log.v("onCreate()", "Starting onCreate() in GoogleMaps.java");
 
         mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
@@ -88,7 +88,7 @@ public class GoogleMaps extends ActionBarActivity
             OpenCSV();
         } catch (Exception e) {
             // Do stuff with the exception.
-            Log.v(APP_TAG, "Couldn't open CSV file!", e);
+            Log.v(APP_TAG, "Couldn't open CSV file! (In GoogleMaps.java)", e);
         }
 
         // Setup the location stuff.
@@ -115,7 +115,7 @@ public class GoogleMaps extends ActionBarActivity
             value = b.getInt("key");
         }
         catch(Exception e) {
-            Log.v("onCreate()", "Failed to get Int from Bundle.");
+            Log.v("onCreate()", "Failed to get Int from Bundle. (IN GOOGLEMAPS.JAVA)");
             value = 3;      // Set default value.
         }
 
@@ -151,15 +151,15 @@ public class GoogleMaps extends ActionBarActivity
     protected void onResume() {
         super.onResume();
 
-        Log.v("onResume()", "Starting onResume()");
+        Log.v("onResume()", "Starting onResume() IN GoogleMaps.java");
 
-        try {
-            // Try and open / read from the CSV file.
-            OpenCSV();
-        } catch (Exception e) {
-            // Do stuff with the exception.
-            Log.v(APP_TAG, "Couldn't open CSV file!", e);
-        }
+//        try {
+//            // Try and open / read from the CSV file.
+//            OpenCSV();
+//        } catch (Exception e) {
+//            // Do stuff with the exception.
+//            Log.v(APP_TAG, "Couldn't open CSV file!", e);
+//        }
 
         createMapView();
         addMarker();
@@ -240,8 +240,10 @@ public class GoogleMaps extends ActionBarActivity
 
                 date = tmpData.get("date");
                 location = tmpData.get("location");
-                String next = date + "," + location;
-                Log.v("Testing current pair: ", next);
+
+                // This was for debugging.
+                //String next = date + "," + location;
+                //Log.v("Testing current pair: ", next);
 
                 // Need to split the location for providing it as a Google Maps marker.
                 String[] parts = location.split("_");
@@ -290,8 +292,8 @@ public class GoogleMaps extends ActionBarActivity
             String value = container.get(1);
 
             // Debugging
-            Log.v("Key is: ", key);
-            Log.v("Value is: ", value);
+//            Log.v("Key is: ", key);
+//            Log.v("Value is: ", value);
 
             HashMap<String, String> map = new HashMap<>();
             map.put("date", key);
@@ -321,26 +323,31 @@ public class GoogleMaps extends ActionBarActivity
                 }
                 else {
                     mTitle = getString(R.string.title_section1);
+                    mNavigationDrawerFragment.changeTitle(mTitle);
                     launchAlerts();
                 }
                 break;
             case 2:
                 // This sets up the contacts view.
                 mTitle = getString(R.string.title_section2);
+                mNavigationDrawerFragment.changeTitle(mTitle);
                 launchContacts();
                 break;
             case 3:
                 // This sets up the previous alerts view
                 mTitle = getString(R.string.title_section3);
+                mNavigationDrawerFragment.changeTitle(mTitle);
                 launchPreviousAlerts();
                 break;
             case 4:
                 // This sets up the google maps view.
                 mTitle = getString(R.string.title_section4);
+                mNavigationDrawerFragment.changeTitle(mTitle);
                 break;
             case 5:
                 // This loads the about page.
                 mTitle = getString(R.string.title_section5);
+                mNavigationDrawerFragment.changeTitle(mTitle);
                 viewAbout();
                 break;
         }
@@ -349,7 +356,7 @@ public class GoogleMaps extends ActionBarActivity
 
     // Launches alerts / contacts activity
     public void launchAlerts() {
-        Log.v(APP_TAG, "Starting launchAlerts()");
+        Log.v(APP_TAG, "Starting launchAlerts(). In GoogleMaps.java");
 
         Intent myIntent = new Intent(GoogleMaps.this, MainActivity.class);
         Bundle b = new Bundle();
@@ -361,7 +368,7 @@ public class GoogleMaps extends ActionBarActivity
 
     // Launches alerts / contacts activity
     public void launchContacts() {
-        Log.v(APP_TAG, "Starting launchAlerts()");
+        Log.v(APP_TAG, "Starting launchAlerts(). In GoogleMaps.java");
 
         Intent myIntent = new Intent(GoogleMaps.this, MainActivity.class);
         Bundle b = new Bundle();
@@ -373,7 +380,7 @@ public class GoogleMaps extends ActionBarActivity
 
     // Launches alerts / contacts activity
     public void launchPreviousAlerts() {
-        Log.v(APP_TAG, "Starting launchAlerts()");
+        Log.v(APP_TAG, "Starting launchAlerts(). In GoogleMaps.java");
 
         Intent myIntent = new Intent(GoogleMaps.this, MainActivity.class);
         Bundle b = new Bundle();
@@ -385,7 +392,7 @@ public class GoogleMaps extends ActionBarActivity
 
     // Launches the About activity
     public void viewAbout() {
-        Log.v(APP_TAG, "Starting viewAbout()...");
+        Log.v(APP_TAG, "Starting viewAbout()...In GoogleMaps.java");
 
         // Launches a new activity.
         Intent myIntent = new Intent(GoogleMaps.this, About.class);
