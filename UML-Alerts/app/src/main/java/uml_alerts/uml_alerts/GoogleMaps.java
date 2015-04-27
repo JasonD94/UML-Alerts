@@ -47,7 +47,7 @@ public class GoogleMaps extends ActionBarActivity
     private static final String APP_TAG = "UML ALERTS";
 
     // Fix bug that launches alerts instead of Google Maps.
-    private boolean first_boot = false;
+    private boolean first_boot = true;
 
     // Previous Alerts filename
     private static final String MAPS_FILE = "maps.csv";
@@ -73,6 +73,12 @@ public class GoogleMaps extends ActionBarActivity
 
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        // I made this method public and preset the selected item to the Google Maps view.
+        // This way, we don't load the first item which defaults to the Alerts view, causing the
+        // user to have to hit the back button in order to get to the Google Maps view!
+        // We should also be doing this in any function that changes the layout of the app.
+        mNavigationDrawerFragment.selectItem(3);
 
         // Setup the alerts_map list.
         alerts_map = new ArrayList<>();
@@ -101,8 +107,43 @@ public class GoogleMaps extends ActionBarActivity
             gps.showSettingsAlert();
         }
 
-        createMapView();
-        addMarker();
+        // Get which view we should load - could be Alerts, Contacts or Previous Alerts
+        Bundle b = getIntent().getExtras();
+        int value;
+
+        try {
+            value = b.getInt("key");
+        }
+        catch(Exception e) {
+            Log.v("onCreate()", "Failed to get Int from Bundle.");
+            value = 3;      // Set default value.
+        }
+
+        // Pick which view should be set.
+        switch(value) {
+            // Loads the Alerts screen
+            case 0:
+                mNavigationDrawerFragment.selectItem(0);
+                break;
+
+            // Loads the Contacts screen
+            case 1:
+                mNavigationDrawerFragment.selectItem(1);
+                break;
+
+            // Loads the Previous Alerts screen.
+            case 2:
+                mNavigationDrawerFragment.selectItem(2);
+                break;
+
+            // on default, load Alerts view. Ex: User first opens app.
+            default:
+                // Loads the ListView up with alerts.
+                mNavigationDrawerFragment.selectItem(3);
+                createMapView();
+                addMarker();
+                break;
+        }
     }
 
 
@@ -283,9 +324,10 @@ public class GoogleMaps extends ActionBarActivity
         switch (number) {
             case 1:
                 // This sets up the alerts view.
-                if(!first_boot) {
-                    first_boot = true;
-                } else {
+                if(first_boot) {
+                    first_boot = false;
+                }
+                else {
                     mTitle = getString(R.string.title_section1);
                     launchAlerts();
                 }
@@ -293,12 +335,12 @@ public class GoogleMaps extends ActionBarActivity
             case 2:
                 // This sets up the contacts view.
                 mTitle = getString(R.string.title_section2);
-                launchAlerts();
+                launchContacts();
                 break;
             case 3:
                 // This sets up the previous alerts view
                 mTitle = getString(R.string.title_section3);
-                launchAlerts();
+                launchPreviousAlerts();
                 break;
             case 4:
                 // This sets up the google maps view.
@@ -318,6 +360,33 @@ public class GoogleMaps extends ActionBarActivity
         Log.v(APP_TAG, "Starting launchAlerts()");
 
         Intent myIntent = new Intent(GoogleMaps.this, MainActivity.class);
+        Bundle b = new Bundle();
+        b.putInt("key", 0);         // ID of the page to be loaded.
+        myIntent.putExtras(b);      // Put the ID in the intent.
+        startActivity(myIntent);
+    }
+
+
+    // Launches alerts / contacts activity
+    public void launchContacts() {
+        Log.v(APP_TAG, "Starting launchAlerts()");
+
+        Intent myIntent = new Intent(GoogleMaps.this, MainActivity.class);
+        Bundle b = new Bundle();
+        b.putInt("key", 1);         // ID of the page to be loaded.
+        myIntent.putExtras(b);      // Put the ID in the intent.
+        startActivity(myIntent);
+    }
+
+
+    // Launches alerts / contacts activity
+    public void launchPreviousAlerts() {
+        Log.v(APP_TAG, "Starting launchAlerts()");
+
+        Intent myIntent = new Intent(GoogleMaps.this, MainActivity.class);
+        Bundle b = new Bundle();
+        b.putInt("key", 2);         // ID of the page to be loaded.
+        myIntent.putExtras(b);      // Put the ID in the intent.
         startActivity(myIntent);
     }
 
@@ -329,6 +398,11 @@ public class GoogleMaps extends ActionBarActivity
         // Launches a new activity.
         Intent myIntent = new Intent(GoogleMaps.this, About.class);
         startActivity(myIntent);
+
+        // After we get back here from the user hitting the back button,
+        // reset the title to the Google Maps title.
+        mTitle = getString(R.string.title_section4);
+        mNavigationDrawerFragment.selectItem(3);
     }
 
 

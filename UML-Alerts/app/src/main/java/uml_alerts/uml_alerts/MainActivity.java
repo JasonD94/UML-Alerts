@@ -52,10 +52,8 @@ import java.util.Set;
 
 
 /**
- *      Known bugs:
- *
- *      1. onCreate is causing duplicate contacts in the "AddAlert" screen.
- *      2. There is also duplicates in the previous alerts section... wtf.
+ *      At the current point in time, there are no known bugs in this code.
+ *      There may be random glitches though - further testing is required.
  *
  */
 
@@ -65,6 +63,9 @@ public class MainActivity extends ActionBarActivity
 
     // Used to store the last screen title. For use in {@link #restoreActionBar()}.
     private CharSequence mTitle;
+
+    // Nagivation bar variable stored here.
+    NavigationDrawerFragment mNavigationDrawerFragment;
 
     // Google Maps base URL
     private static final String maps_URL = "http://maps.google.com/maps?z=1&h=m&q=loc:";
@@ -129,41 +130,10 @@ public class MainActivity extends ActionBarActivity
         // Logcat, one for every function / method.
         Log.v(APP_TAG, "Starting onCreate()...");
 
-        // Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-        NavigationDrawerFragment mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
-
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
-
-        // Loads the ListView up with alerts.
-        createAlerts();
-
-        // ********************************
-        //  Below this is the button code.
-        // ********************************
-        addAlertButton = (Button) findViewById(R.id.AddAlertButton);
-        addAlertButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                AddAlert();
-            }
-        });
-
-        // Setup the alerts_map list.
-        alerts_map = new ArrayList<>();
-
-        try {
-            // Try and open / read from the CSV file.
-            OpenCSV();
-        } catch (Exception e) {
-            // Do stuff with the exception.
-            Log.v(APP_TAG, "Couldn't open CSV file!", e);
-        }
-
-        // Setup the location stuff.
+        /**
+         *      Setup the location stuff.
+         *      Doing this first to grab the location as fast as possible.
+         */
         gps = new GPSTracker(this);
         if(gps.canGetLocation()) {
             double latitude = gps.getLatitude();
@@ -173,14 +143,80 @@ public class MainActivity extends ActionBarActivity
             Log.v("onCreate()", "Your Location is - \nLat: " + latitude + "\nLong: " + longitude);
 
         }else{
-            // Can't get location
-            // GPS or Network is not enabled
-            // Ask user to enable GPS/network in settings
+            // Can't get location, as GPS or Network is not enabled
+            // Ask user to enable GPS/Network in settings
             gps.showSettingsAlert();
+        }
+
+        // Setup the alerts_map list.
+        alerts_map = new ArrayList<>();
+
+        /**    Opens the CSV files - alerts / previous alerts maps data.    **/
+        try {
+            // Try and open / read from the CSV file.
+            OpenCSV();
+        } catch (Exception e) {
+            // Do stuff with the exception.
+            Log.v(APP_TAG, "Couldn't open CSV file!", e);
         }
 
         // Get the contact data into the ArrayList.
         getContacts();
+
+        /** This part sets up the Navigation Drawer.  **/
+        // Fragment managing the behaviors, interactions and presentation of the navigation drawer.
+        mNavigationDrawerFragment = (NavigationDrawerFragment)
+                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+        mTitle = getTitle();
+
+        // Set up the drawer.
+        mNavigationDrawerFragment.setUp(
+                R.id.navigation_drawer,
+                (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        // Get which view we should load - could be Alerts, Contacts or Previous Alerts
+        Bundle b = getIntent().getExtras();
+        int value;
+
+        try {
+            value = b.getInt("key");
+        }
+        catch(Exception e) {
+            Log.v("onCreate()", "Failed to get Int from Bundle.");
+            value = 0;      // Set default value.
+        }
+
+        // Pick which view should be set.
+        switch(value) {
+            // Loads the Alerts screen
+            case 0:
+                mNavigationDrawerFragment.selectItem(0);
+                break;
+
+            // Loads the Contacts screen
+            case 1:
+                mNavigationDrawerFragment.selectItem(1);
+                break;
+
+            // Loads the Previous Alerts screen.
+            case 2:
+                mNavigationDrawerFragment.selectItem(2);
+                break;
+
+                // on default, load Alerts view. Ex: User first opens app.
+            default:
+                // Loads the ListView up with alerts.
+                mNavigationDrawerFragment.selectItem(0);
+                createAlerts();
+
+                addAlertButton = (Button) findViewById(R.id.AddAlertButton);
+                addAlertButton.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View view) {
+                        AddAlert();
+                    }
+                });
+                break;
+        }
     }
 
 
@@ -208,15 +244,15 @@ public class MainActivity extends ActionBarActivity
         super.onResume();  // Always call the superclass method first
         Log.v(APP_TAG, "Starting onResume()...");
 
-        getContacts();
-
-        try {
-            // Try and open / read from the CSV file.
-            OpenCSV();
-        } catch (Exception e) {
-            // Do stuff with the exception.
-            Log.v(APP_TAG, "Couldn't open CSV file!", e);
-        }
+//        getContacts();
+//
+//        try {
+//            // Try and open / read from the CSV file.
+//            OpenCSV();
+//        } catch (Exception e) {
+//            // Do stuff with the exception.
+//            Log.v(APP_TAG, "Couldn't open CSV file!", e);
+//        }
 
         // Update the location.
         if(gps.canGetLocation()) {
@@ -224,7 +260,6 @@ public class MainActivity extends ActionBarActivity
             double longitude = gps.getLongitude();
 
             // Show location to logcat.
-//            Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
             Log.v("onCreate()", "Your Location is - \nLat: " + latitude + "\nLong: " + longitude);
 
         }else{
@@ -233,9 +268,6 @@ public class MainActivity extends ActionBarActivity
             // Ask user to enable GPS/network in settings
             gps.showSettingsAlert();
         }
-
-        // Setup the alerts_map list.
-        //alerts_map = new ArrayList<>();
     }
 
 
@@ -287,7 +319,15 @@ public class MainActivity extends ActionBarActivity
 
         // Launches a new activity.
         Intent myIntent = new Intent(MainActivity.this, GoogleMaps.class);
+        Bundle b = new Bundle();
+        b.putInt("key", 3);         // ID of the page to be loaded.
+        myIntent.putExtras(b);      // Put the ID in the intent.
         startActivity(myIntent);
+
+        // After the Google Maps page launches, the view resets to the Alert's page,
+        // so we should reset the title in the Sidebar as well!
+        mTitle = getString(R.string.title_section1);
+        mNavigationDrawerFragment.selectItem(0);
     }
 
 
@@ -298,6 +338,11 @@ public class MainActivity extends ActionBarActivity
         // Launches a new activity.
         Intent myIntent = new Intent(MainActivity.this, About.class);
         MainActivity.this.startActivity(myIntent);
+
+        // After the About page loads and the user returns by hitting the back button, we should
+        // reset the view to the alerts page and make the title the Alerts title.
+        mTitle = getString(R.string.title_section1);
+        mNavigationDrawerFragment.selectItem(0);
     }
 
 
