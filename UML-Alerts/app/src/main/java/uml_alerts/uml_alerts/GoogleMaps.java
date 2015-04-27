@@ -141,12 +141,17 @@ public class GoogleMaps extends ActionBarActivity
                 launchAlerts();
                 break;
             case 3:
-                // This sets up the google maps view.
+                // This sets up the previous alerts view
                 mTitle = getString(R.string.title_section3);
+                launchAlerts();
                 break;
             case 4:
-                // This loads the about page.
+                // This sets up the google maps view.
                 mTitle = getString(R.string.title_section4);
+                break;
+            case 5:
+                // This loads the about page.
+                mTitle = getString(R.string.title_section5);
                 viewAbout();
                 break;
         }

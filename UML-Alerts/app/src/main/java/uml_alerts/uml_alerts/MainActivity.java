@@ -2,7 +2,6 @@ package uml_alerts.uml_alerts;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -34,10 +33,14 @@ import com.opencsv.CSVWriter;
 
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -57,6 +60,7 @@ public class MainActivity extends ActionBarActivity
 
     // Const file name for the CSV file.
     private static final String CSV_FILE = "alerts.csv";
+    private static final String MAPS_FILE = "maps.csv";
 
     // App Log Tag.
     private static final String APP_TAG = "UML ALERTS";
@@ -74,7 +78,7 @@ public class MainActivity extends ActionBarActivity
     // Map for the previous alerts
     // Key: Alert time
     // Value: Lat / Long location
-    Map<String, String> alerts_map = new HashMap<>();
+    List<HashMap<String, String>> alerts_map;
 
     // ListView to display the alerts.
     ListView alert_list;
@@ -98,8 +102,6 @@ public class MainActivity extends ActionBarActivity
     // Location Manager.
     GPSTracker gps;
 
-    // Progress bar for the contact loading.
-    protected ProgressDialog mProgressDialog;
 
     /**
      *      Android related methods are at the top.
@@ -155,7 +157,7 @@ public class MainActivity extends ActionBarActivity
             Log.v("onCreate()", "Your Location is - \nLat: " + latitude + "\nLong: " + longitude);
 
         }else{
-            // can't get location
+            // Can't get location
             // GPS or Network is not enabled
             // Ask user to enable GPS/network in settings
             gps.showSettingsAlert();
@@ -163,6 +165,9 @@ public class MainActivity extends ActionBarActivity
 
         // Get the contact data into the ArrayList.
         getContacts();
+
+        // Setup the alerts_map list.
+        alerts_map = new ArrayList<>();
     }
 
 
@@ -215,6 +220,9 @@ public class MainActivity extends ActionBarActivity
             // Ask user to enable GPS/network in settings
             gps.showSettingsAlert();
         }
+
+        // Setup the alerts_map list.
+        //alerts_map = new ArrayList<>();
     }
 
 
@@ -243,13 +251,18 @@ public class MainActivity extends ActionBarActivity
                 createContacts();
                 break;
             case 3:
-                // This sets up the google maps view.
+                // This sets up the previous alerts view
                 mTitle = getString(R.string.title_section3);
-                launchMaps();
+                createPreviousAlerts();
                 break;
             case 4:
-                // This loads the about page.
+                // This sets up the google maps view.
                 mTitle = getString(R.string.title_section4);
+                launchMaps();
+                break;
+            case 5:
+                // This loads the about page.
+                mTitle = getString(R.string.title_section5);
                 viewAbout();
                 break;
         }
@@ -280,6 +293,7 @@ public class MainActivity extends ActionBarActivity
         // Opening CSV file log.
         Log.v(APP_TAG, "Starting OpenCSV()...");
 
+        // The first part opens the alerts data from a CSV file called "alerts.csv"
         // Get path for storing / accessing the CSV file.
         String csv_path = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + CSV_FILE;
 
@@ -300,18 +314,45 @@ public class MainActivity extends ActionBarActivity
             String key = container.get(0);
             String value = container.get(1);
 
-            // Debugging
-//            Log.v(APP_TAG, "Key is: ");
-//            Log.v(APP_TAG, key);
-//
-//            Log.v(APP_TAG, "Value is: ");
-//            Log.v(APP_TAG, value);
-
             // Add to the map.
             alerts_list.put(key, value);
 
             // Get the next line.
             line = reader.readNext();
+        }
+
+        // This second part opens the map data from a CSV file called "maps.csv"
+        // Get path for storing / accessing the CSV file.
+        csv_path = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + MAPS_FILE;
+
+        // Open data from the CSV file
+        String lines[];
+
+        // Build an instance of the CSVReader class. Give it the CSV file's name.
+        reader = new CSVReader(new FileReader(csv_path));
+
+        // Read all the data off the CSV file.
+        lines = reader.readNext();
+
+        while (lines != null) {
+            // This gets the line and splits it based on the comma.
+            List<String> container = Arrays.asList(lines);
+
+            // This gets the key / value from the List container.
+            String key = container.get(0);
+            String value = container.get(1);
+
+            // Debugging
+            Log.v("Key is: ", key);
+            Log.v("Value is: ", value);
+
+            HashMap<String, String> map = new HashMap<>();
+            map.put("date", key);
+            map.put("location", value);
+            alerts_map.add(map);
+
+            // Get the next line.
+            lines = reader.readNext();
         }
 
         // Now update the alerts view.
@@ -324,6 +365,7 @@ public class MainActivity extends ActionBarActivity
         // Opening CSV file log.
         Log.v(APP_TAG, "Starting SaveCSV()...");
 
+        // The first part saves the alerts data to a CSV file called "alerts.csv"
         // Get path for storing / accessing the CSV file.
         String csv_path = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + CSV_FILE;
 
@@ -340,6 +382,48 @@ public class MainActivity extends ActionBarActivity
             String[] cur_alert = next.split(",");
             writer.writeNext(cur_alert);
         }
+
+        // Close the writer.
+        writer.close();
+
+        // This second part saves the map data to a CSV file called "maps.csv"
+        // Get path for storing / accessing the CSV file.
+        csv_path = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + MAPS_FILE;
+
+        // Create an instance of the CSVWriter class. Give it the CSV file's name.
+        writer = new CSVWriter(new FileWriter(csv_path));
+
+        String date, location;
+
+        for (int a = 0; a < alerts_map.size(); a++) {
+            HashMap<String, String> tmpData = alerts_map.get(a);
+
+            date = tmpData.get("date");
+            location = tmpData.get("location");
+            String next = date + "," + location;
+
+            Log.v("Testing current pair: ", next);
+
+            String[] cur_alert = next.split(",");
+            writer.writeNext(cur_alert);
+        }
+
+        /*
+        HashMap<String, String> map = new HashMap<>();
+        map.put("date", key);
+        map.put("location", value);
+        alerts_map.add(map);
+
+        // While we've got a valid thing in the map.
+        for (Map.Entry<String, String> entry : alerts_map.entrySet()) {
+            // Now pair will have a key / value that we can save.
+            String key = entry.getKey();
+            String value = entry.getValue();
+            String next = key + "," + value;
+
+            String[] cur_alert = next.split(",");
+            writer.writeNext(cur_alert);
+        }*/
 
         // Close the writer.
         writer.close();
@@ -629,6 +713,56 @@ public class MainActivity extends ActionBarActivity
     }
 
 
+    public void createPreviousAlerts() {
+        Log.v("createPreviousAlerts", "Starting createPreviousAlerts()...");
+
+        // Get the list view from the XML file.
+        contacts_list = (ListView) findViewById(R.id.listView);
+
+        // Onclick listener for the contacts
+        contacts_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // This does nothing because it shouldn't do anything at all.
+            }
+        });
+
+        // Make the "add new alert button" actually just pop up the add new contact page.
+        // Setup the Add alerts button.
+        addAlertButton = (Button) findViewById(R.id.AddAlertButton);
+        addAlertButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                // This does nothing because it shouldn't do anything at all.
+            }
+        });
+
+        // From is a list of Key's.
+        // to is an array of IDs for the strings.
+        String[] from = {"date", "location"};
+        int[] to = {android.R.id.text1, android.R.id.text2};
+
+        // Try and see if we can get any previous alerts.
+        try {
+            // Simple adapter is all we need for this.
+            list_adapter = new SimpleAdapter(this, alerts_map, android.R.layout.simple_list_item_2, from, to);
+            contacts_list.setAdapter(list_adapter);
+        }
+        catch(Exception e) {
+            // Do stuff with the exception.
+            Log.v(APP_TAG, "Couldn't view previous alerts!", e);
+
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("No Previous Alerts")
+                    .setMessage("You don't have any previous alerts yet! Try sending some! :-D")
+                    .setCancelable(false)
+                    .setPositiveButton("OK - Got it.", new AlertDialog.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    }).create().show();
+        }
+    }
+
+
     // Simple function for (+) button.
     public void AddContact() {
         Intent intent = new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI);
@@ -723,6 +857,11 @@ public class MainActivity extends ActionBarActivity
                 List<String> numbers;
                 numbers = Arrays.asList(_phoneNo.split("\n"));
 
+                // Pre-set to Olsen Hall, or 42.654802, -71.326363
+                double latitude = 42.654802;
+                double longitude = -71.326363;
+                String location = Double.toString(latitude) + "," + Double.toString(longitude);
+
                 for(String num : numbers) {
                     Log.v("Sending SMS Alert to: ", num);
 
@@ -735,11 +874,7 @@ public class MainActivity extends ActionBarActivity
 
                     Log.v("Sending SMS Alert to: ", phoneNo);
 
-                    // Append a google maps URL to the message with a set location (for now)
-                    // Pre-set to Olsen Hall, or 42.654802, -71.326363
-                    double latitude = 42.654802;
-                    double longitude = -71.326363;
-
+                    // Get the current location.
                     if(gps.canGetLocation()) {
                         latitude = gps.getLatitude();
                         longitude = gps.getLongitude();
@@ -752,22 +887,40 @@ public class MainActivity extends ActionBarActivity
 
                     // Message for the user explaining why there's a google maps URL at the bottom.
                     String location_msg = "\nMy current location is: ";
+                    location = Double.toString(latitude) + "," + Double.toString(longitude);
 
-                    String maps = maps_URL + Double.toString(latitude) + "," + Double.toString(longitude);
+                    // Append a google maps URL to the message
+                    String maps = maps_URL + location;
                     message += location_msg + maps;
 
                     try {
                         SmsManager smsManager = SmsManager.getDefault();
                         smsManager.sendTextMessage(phoneNo, null, message, null, null);
-                        Toast.makeText(getApplicationContext(), "SMS sent to: " + phoneNo,
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "SMS sent to: " + phoneNo, Toast.LENGTH_SHORT).show();
                     } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(),
-                                "SMS failed, please try again.",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "SMS failed, please try again.", Toast.LENGTH_SHORT).show();
                         e.printStackTrace();
                     }
                 }
+
+                // Update the map with a new alert that's been sent.
+                // Doing so here to just add one map location, VS a million if the user sent this alert
+                // to say 5 or more people.
+
+                // Add a date / time
+                DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+                Date today = Calendar.getInstance().getTime();
+                String date = dateFormat.format(today);
+
+                // Create a location string for saving.
+                String loc = latitude + "_" + longitude;
+
+                // Create a location string.
+                HashMap<String, String> map = new HashMap<>();
+                map.put("date", date);
+                map.put("location", loc);
+                alerts_map.add(map);
+                //alerts_map.put(date, location);
             }
         });
         sms.setNegativeButton(android.R.string.no, null);

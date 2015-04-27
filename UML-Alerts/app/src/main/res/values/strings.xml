@@ -10,8 +10,9 @@
 
     <string name="title_section1">Alerts</string>
     <string name="title_section2">Contacts</string>
-    <string name="title_section3">Map of Previous Alerts</string>
-    <string name="title_section4">About</string>
+    <string name="title_section3">List of Previous Alerts</string>
+    <string name="title_section4">Map of Previous Alerts</string>
+    <string name="title_section5">About</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
