@@ -49,6 +49,15 @@ import java.util.List;
 import java.util.Map;
 
 
+/**
+ *      Known bugs:
+ *
+ *      1. onCreate is causing duplicate contacts in the "AddAlert" screen.
+ *      2. Need to populate the GoogleMaps with previous alerts.
+ *
+ */
+
+
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
@@ -66,7 +75,7 @@ public class MainActivity extends ActionBarActivity
     private static final String APP_TAG = "UML ALERTS";
 
     // Map for the Alerts.
-    // Key: Phone Number (in String form) - soon to be separated by dots for other numbers.
+    // Key: Phone Number (in String form) - separated by newlines for multiple numbers.
     // Value: Message
     Map<String, String> alerts_list = new HashMap<>();
 
@@ -76,8 +85,8 @@ public class MainActivity extends ActionBarActivity
     List<HashMap<String, String>> contactData;
 
     // Map for the previous alerts
-    // Key: Alert time
-    // Value: Lat / Long location
+    // Key: date
+    // Value: location
     List<HashMap<String, String>> alerts_map;
 
     // ListView to display the alerts.
@@ -153,7 +162,6 @@ public class MainActivity extends ActionBarActivity
             double longitude = gps.getLongitude();
 
             // Show location to logcat.
-//            Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
             Log.v("onCreate()", "Your Location is - \nLat: " + latitude + "\nLong: " + longitude);
 
         }else{

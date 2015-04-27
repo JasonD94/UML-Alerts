@@ -14,10 +14,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.opencsv.CSVReader;
+
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 public class GoogleMaps extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -41,10 +49,24 @@ public class GoogleMaps extends ActionBarActivity
     // Fix bug that launches alerts instead of Google Maps.
     private boolean first_boot = false;
 
+    // Previous Alerts filename
+    private static final String MAPS_FILE = "maps.csv";
+
+    // Map for the previous alerts
+    // Key: date
+    // Value: location
+    List<HashMap<String, String>> alerts_map;
+
+    // Location Manager.
+    GPSTracker gps;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.google_maps);
+
+        Log.v("onCreate()", "Starting onCreate()");
 
         mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
@@ -52,8 +74,73 @@ public class GoogleMaps extends ActionBarActivity
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
 
+        // Setup the alerts_map list.
+        alerts_map = new ArrayList<>();
+
+        try {
+            // Try and open / read from the CSV file.
+            OpenCSV();
+        } catch (Exception e) {
+            // Do stuff with the exception.
+            Log.v(APP_TAG, "Couldn't open CSV file!", e);
+        }
+
+        // Setup the location stuff.
+        gps = new GPSTracker(this);
+        if(gps.canGetLocation()) {
+            double latitude = gps.getLatitude();
+            double longitude = gps.getLongitude();
+
+            // Show location to logcat.
+            Log.v("onCreate()", "Your Location is - \nLat: " + latitude + "\nLong: " + longitude);
+
+        }else{
+            // Can't get location
+            // GPS or Network is not enabled
+            // Ask user to enable GPS/network in settings
+            gps.showSettingsAlert();
+        }
+
         createMapView();
         addMarker();
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.v("onResume()", "Starting onResume()");
+
+        try {
+            // Try and open / read from the CSV file.
+            OpenCSV();
+        } catch (Exception e) {
+            // Do stuff with the exception.
+            Log.v(APP_TAG, "Couldn't open CSV file!", e);
+        }
+
+        try {
+            // Try and open / read from the CSV file.
+            OpenCSV();
+        } catch (Exception e) {
+            // Do stuff with the exception.
+            Log.v(APP_TAG, "Couldn't open CSV file!", e);
+        }
+
+        createMapView();
+        addMarker();
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();  // Always call the superclass method first
+
+        Log.v(APP_TAG, "Starting onPause()...");
+
+        // Stop listening to the location.
+        gps.stopUsingGPS();
     }
 
 
@@ -83,8 +170,13 @@ public class GoogleMaps extends ActionBarActivity
          */
         try {
             if(null == googleMap){
-                googleMap = ((MapFragment) getFragmentManager().findFragmentById(
-                        R.id.mapView)).getMap();
+                googleMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.mapView)).getMap();
+
+                // Zoom the Google Maps to the user's current location.
+                double latitude = gps.getLatitude();
+                double longitude = gps.getLongitude();
+
+                googleMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 10.0f) );
 
                 /**
                  * If the map is still null after attempted initialisation,
@@ -106,12 +198,75 @@ public class GoogleMaps extends ActionBarActivity
     private void addMarker(){
 
         /** Make sure that the map has been initialised **/
-        if(null != googleMap){
-            googleMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(0, 0))
-                            .title("Marker")
-                            .draggable(true)
-            );
+        if(null != googleMap) {
+            String date, location;
+
+            /** Add markers for all of the previous alerts. **/
+            for (int a = 0; a < alerts_map.size(); a++) {
+                HashMap<String, String> tmpData = alerts_map.get(a);
+
+                date = tmpData.get("date");
+                location = tmpData.get("location");
+                String next = date + "," + location;
+                Log.v("Testing current pair: ", next);
+
+                // Need to split the location for providing it as a Google Maps marker.
+                String[] parts = location.split("_");
+                String Latitude = parts[0];
+                String Longitude = parts[1];
+
+                // Convert the lat / long to doubles
+                Double Lat = Double.parseDouble(Latitude);
+                Double Long = Double.parseDouble(Longitude);
+
+                googleMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(Lat, Long))
+                                .title("Alert Time: " + date)
+                                .draggable(false)
+                );
+            }
+        }
+    }
+
+
+
+    // Open data from a CSV file, save to the map.
+    public void OpenCSV() throws Exception {
+        // Opening CSV file log.
+        Log.v(APP_TAG, "Starting OpenCSV()...");
+
+        // This part opens the map data from a CSV file called "maps.csv"
+        // Get path for storing / accessing the CSV file.
+        String csv_path = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + MAPS_FILE;
+
+        // Open data from the CSV file
+        String lines[];
+
+        // Build an instance of the CSVReader class. Give it the CSV file's name.
+        CSVReader reader = new CSVReader(new FileReader(csv_path));
+
+        // Read all the data off the CSV file.
+        lines = reader.readNext();
+
+        while (lines != null) {
+            // This gets the line and splits it based on the comma.
+            List<String> container = Arrays.asList(lines);
+
+            // This gets the key / value from the List container.
+            String key = container.get(0);
+            String value = container.get(1);
+
+            // Debugging
+            Log.v("Key is: ", key);
+            Log.v("Value is: ", value);
+
+            HashMap<String, String> map = new HashMap<>();
+            map.put("date", key);
+            map.put("location", value);
+            alerts_map.add(map);
+
+            // Get the next line.
+            lines = reader.readNext();
         }
     }
 
