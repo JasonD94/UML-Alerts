@@ -83,13 +83,10 @@ public class GoogleMaps extends ActionBarActivity
         // Setup the alerts_map list.
         alerts_map = new ArrayList<>();
 
-        try {
-            // Try and open / read from the CSV file.
-            OpenCSV();
-        } catch (Exception e) {
-            // Do stuff with the exception.
-            Log.v(APP_TAG, "Couldn't open CSV file! (In GoogleMaps.java)", e);
-        }
+
+        // Try and open / read from the CSV file.
+        // This will be done in the background to speed up the loading of the Google Maps View.
+        openCSV();
 
         // Setup the location stuff.
         gps = new GPSTracker(this);
@@ -264,12 +261,29 @@ public class GoogleMaps extends ActionBarActivity
     }
 
 
+    // Pulls data from the user's contacts book into the contacts map.
+    // This runs in a new thread, to avoid slowing down the UI.
+    public void openCSV() {
+        // Opening CSV file log.
+        Log.v(APP_TAG, "Starting OpenCSV()...In GoogleMaps.java");
+
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    openCSVInBackGround();
+                }
+                catch(Exception e) {
+                    // Do stuff with the exception.
+                    Log.v(APP_TAG, "Couldn't openCSV file! (In GoogleMaps.java)", e);
+                }
+            }
+        }.start();
+    }
+
 
     // Open data from a CSV file, save to the map.
-    public void OpenCSV() throws Exception {
-        // Opening CSV file log.
-        Log.v(APP_TAG, "Starting OpenCSV()...");
-
+    public void openCSVInBackGround() throws Exception {
         // This part opens the map data from a CSV file called "maps.csv"
         // Get path for storing / accessing the CSV file.
         String csv_path = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + MAPS_FILE;

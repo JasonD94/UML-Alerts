@@ -53,12 +53,10 @@ import java.util.Set;
 
 /**
  *      Known Bugs to work out:
- *      FIXED
- *      2. Google Maps view takes a while to load - should optimize this.
- *          ACTUALLY, this may be due to slow networks - should test at different spots
- *          to rule out wifi / data signal problems
- *      3. Disable location found notification on G3 - annoying that it stays around forever.
- *      4. Save the CSV files in a folder - not directly on the SD CARD.
+ *      1. On first load, GoogleMaps takes about 2-3 seconds to load.
+ *          Should investigate why it skips 47 frames...
+ *      2. Disable location found notification on G3 - annoying that it stays around forever.
+ *      3. Save the CSV files in a folder - not directly on the SD CARD.
  *          - This should be a simple fix, call mkdir() or something.
  *          See: https://stackoverflow.com/questions/15138695/how-to-make-folder-in-sdcard-in-android
  *
@@ -509,7 +507,7 @@ public class MainActivity extends ActionBarActivity
     // This is used by the above buildData as a helper method to generate the ArrayList
     // from the alerts map.
     private HashMap<String, String> putData(String phone_number, String alert) {
-        Log.v(APP_TAG, "Starting putData()...In MainActivity.java");
+        //Log.v(APP_TAG, "Starting putData()...In MainActivity.java");
 
         HashMap<String, String> item = new HashMap<>();
         item.put("phone_number", phone_number);
