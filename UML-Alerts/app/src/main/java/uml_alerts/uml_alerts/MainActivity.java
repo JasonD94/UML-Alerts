@@ -58,6 +58,9 @@ import java.util.Set;
  *          ACTUALLY, this may be due to slow networks - should test at different spots
  *          to rule out wifi / data signal problems
  *      3. Disable location found notification on G3 - annoying that it stays around forever.
+ *      4. Save the CSV files in a folder - not directly on the SD CARD.
+ *          - This should be a simple fix, call mkdir() or something.
+ *          See: https://stackoverflow.com/questions/15138695/how-to-make-folder-in-sdcard-in-android
  *
  */
 
