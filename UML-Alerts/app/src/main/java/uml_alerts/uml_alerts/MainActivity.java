@@ -42,18 +42,20 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
  *      Known bugs:
  *
  *      1. onCreate is causing duplicate contacts in the "AddAlert" screen.
- *      2. Need to populate the GoogleMaps with previous alerts.
+ *      2. There is also duplicates in the previous alerts section... wtf.
  *
  */
 
@@ -82,18 +84,21 @@ public class MainActivity extends ActionBarActivity
     // Map for the contacts
     // Key: Name
     // Value: Phone Number
-    List<HashMap<String, String>> contactData;
+    ArrayList<HashMap<String, String>> contactData;
 
     // Map for the previous alerts
     // Key: date
     // Value: location
-    List<HashMap<String, String>> alerts_map;
+    ArrayList<HashMap<String, String>> alerts_map;
 
     // ListView to display the alerts.
     ListView alert_list;
 
     // ListView to display the contacts
     ListView contacts_list;
+
+    // ListView to display the previous alerts.
+    ListView previous_list;
 
     // Adapter for the ListView.
     SimpleAdapter list_adapter;
@@ -147,6 +152,9 @@ public class MainActivity extends ActionBarActivity
             }
         });
 
+        // Setup the alerts_map list.
+        alerts_map = new ArrayList<>();
+
         try {
             // Try and open / read from the CSV file.
             OpenCSV();
@@ -173,9 +181,6 @@ public class MainActivity extends ActionBarActivity
 
         // Get the contact data into the ArrayList.
         getContacts();
-
-        // Setup the alerts_map list.
-        alerts_map = new ArrayList<>();
     }
 
 
@@ -362,6 +367,14 @@ public class MainActivity extends ActionBarActivity
             // Get the next line.
             lines = reader.readNext();
         }
+
+        // Remove duplicates from the ArrayList by adding it to a Set.
+        Set<HashMap<String, String>> tmp = new HashSet<>();
+
+        // THIS WILL REMOVE ALL DUPLICATES FROM THE ARRAYLIST.
+        tmp.addAll(alerts_map);
+        alerts_map.clear();
+        alerts_map.addAll(tmp);
 
         // Now update the alerts view.
         updateListView();
@@ -725,10 +738,10 @@ public class MainActivity extends ActionBarActivity
         Log.v("createPreviousAlerts", "Starting createPreviousAlerts()...");
 
         // Get the list view from the XML file.
-        contacts_list = (ListView) findViewById(R.id.listView);
+        previous_list = (ListView) findViewById(R.id.listView);
 
         // Onclick listener for the contacts
-        contacts_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        previous_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // This does nothing because it shouldn't do anything at all.
             }
@@ -752,7 +765,7 @@ public class MainActivity extends ActionBarActivity
         try {
             // Simple adapter is all we need for this.
             list_adapter = new SimpleAdapter(this, alerts_map, android.R.layout.simple_list_item_2, from, to);
-            contacts_list.setAdapter(list_adapter);
+            previous_list.setAdapter(list_adapter);
         }
         catch(Exception e) {
             // Do stuff with the exception.
@@ -916,7 +929,7 @@ public class MainActivity extends ActionBarActivity
                 // to say 5 or more people.
 
                 // Add a date / time
-                DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+                DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
                 Date today = Calendar.getInstance().getTime();
                 String date = dateFormat.format(today);
 
