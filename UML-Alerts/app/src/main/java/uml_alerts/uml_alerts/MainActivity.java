@@ -429,23 +429,6 @@ public class MainActivity extends ActionBarActivity
             writer.writeNext(cur_alert);
         }
 
-        /*
-        HashMap<String, String> map = new HashMap<>();
-        map.put("date", key);
-        map.put("location", value);
-        alerts_map.add(map);
-
-        // While we've got a valid thing in the map.
-        for (Map.Entry<String, String> entry : alerts_map.entrySet()) {
-            // Now pair will have a key / value that we can save.
-            String key = entry.getKey();
-            String value = entry.getValue();
-            String next = key + "," + value;
-
-            String[] cur_alert = next.split(",");
-            writer.writeNext(cur_alert);
-        }*/
-
         // Close the writer.
         writer.close();
     }
@@ -585,6 +568,14 @@ public class MainActivity extends ActionBarActivity
     // Makes a simple alert dialog with its own view stuff.
     public void AddAlert() {
         Log.i(APP_TAG, "Starting AddAlert()...");
+
+        // Remove duplicates from the contactsData ArrayList by adding it to a Set.
+        Set<HashMap<String, String>> tmp = new HashSet<>();
+
+        // THIS WILL REMOVE ALL DUPLICATES FROM THE ARRAY LIST.
+        tmp.addAll(contactData);
+        contactData.clear();
+        contactData.addAll(tmp);
 
         // Text entry dialog.
         AlertDialog.Builder text_entry = new AlertDialog.Builder(this);
