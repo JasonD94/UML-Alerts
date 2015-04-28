@@ -10,5 +10,8 @@ internal memory of the user's phone, which is then displayed on a Google Maps
 view in the app to show the user where their previous alerts have taken place
 and at what time.
 
+The Android Studio project for this app can be found in the "UML-Alerts"
+directory.
+
 This app was originally created by Jason Downing and Udit Bhansali for an
 Android Development course at UMass Lowell.
