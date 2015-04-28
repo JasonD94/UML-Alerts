@@ -68,7 +68,7 @@ import java.util.Set;
  *     OR: allow email alerts
  *     OR: support IM alerts via Google Hangouts / Facebook Messenger
  *
- *  5. 
+ *  5.
  *
  */
 
