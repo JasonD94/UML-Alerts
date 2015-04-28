@@ -150,13 +150,13 @@ public class GoogleMaps extends ActionBarActivity
 
         Log.v("onResume()", "Starting onResume() IN GoogleMaps.java");
 
-//        try {
-//            // Try and open / read from the CSV file.
-//            OpenCSV();
-//        } catch (Exception e) {
-//            // Do stuff with the exception.
-//            Log.v(APP_TAG, "Couldn't open CSV file!", e);
-//        }
+        try {
+            // Try and open / read from the CSV file.
+            openCSV();
+        } catch (Exception e) {
+            // Do stuff with the exception.
+            Log.v(APP_TAG, "Couldn't open CSV file!", e);
+        }
 
         createMapView();
         addMarker();

@@ -55,8 +55,7 @@ import java.util.Set;
  *      Known Bugs to work out:
  *      1. On first load, GoogleMaps takes about 2-3 seconds to load.
  *          Should investigate why it skips 47 frames...
- *      2. Disable location found notification on G3 - annoying that it stays around forever.
- *      3. Save the CSV files in a folder - not directly on the SD CARD.
+ *      2. Save the CSV files in a folder - not directly on the SD CARD.
  *          - This should be a simple fix, call mkdir() or something.
  *          See: https://stackoverflow.com/questions/15138695/how-to-make-folder-in-sdcard-in-android
  *
@@ -239,6 +238,9 @@ public class MainActivity extends ActionBarActivity
 
         Log.v(APP_TAG, "Starting onPause()...In MainActivity.java");
 
+        // Stop listening to the location.
+        gps.stopUsingGPS();
+
         // Call the SaveCSV function to save the map data to a CSV file.
         try {
             SaveCSV();
@@ -246,9 +248,6 @@ public class MainActivity extends ActionBarActivity
             // Write exception to logcat.
             Log.v(APP_TAG, "Error! Couldn't save file to CSV! In MainActivity.java", e);
         }
-
-        // Stop listening to the location.
-        gps.stopUsingGPS();
     }
 
 
@@ -271,6 +270,18 @@ public class MainActivity extends ActionBarActivity
             // Ask user to enable GPS/network in settings
             gps.showSettingsAlert();
         }
+
+        /**    Opens the CSV files - alerts / previous alerts maps data.    **/
+        try {
+            // Try and open / read from the CSV file.
+            OpenCSV();
+        } catch (Exception e) {
+            // Do stuff with the exception.
+            Log.v(APP_TAG, "Couldn't open CSV file! In MainActivity.java", e);
+        }
+
+        // Get the contact data into the ArrayList.
+        getContacts();
     }
 
 
@@ -298,6 +309,8 @@ public class MainActivity extends ActionBarActivity
                 // This sets up the contacts view.
                 mTitle = getString(R.string.title_section2);
                 mNavigationDrawerFragment.changeTitle(mTitle);
+                // Get the contact data into the ArrayList.
+                getContacts();
                 createContacts();
                 break;
             case 3:
@@ -424,7 +437,7 @@ public class MainActivity extends ActionBarActivity
         // Remove duplicates from the ArrayList by adding it to a Set.
         Set<HashMap<String, String>> tmp = new HashSet<>();
 
-        // THIS WILL REMOVE ALL DUPLICATES FROM THE ARRAYLIST.
+        // THIS WILL REMOVE ALL DUPLICATES FROM THE ARRAY LIST.
         tmp.addAll(alerts_map);
         alerts_map.clear();
         alerts_map.addAll(tmp);
@@ -952,7 +965,7 @@ public class MainActivity extends ActionBarActivity
                     }
 
                     // Message for the user explaining why there's a google maps URL at the bottom.
-                    String location_msg = "\nMy current location is: ";
+                    String location_msg = "\nLocation: ";
                     location = Double.toString(latitude) + "," + Double.toString(longitude);
 
                     // Append a google maps URL to the message

@@ -264,6 +264,15 @@ public class NavigationDrawerFragment extends Fragment {
 
 
     /**
+     *      Added this method for some random bugs.
+     *
+     */
+    int whichItem() {
+        return mCurrentSelectedPosition;
+    }
+
+
+    /**
      *          I ADDED THIS METHOD TO CHANGE THE TITLE
      *          I DON'T KNOW WHY THE TITLE WON'T EVER CHANGE.
      *
