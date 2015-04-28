@@ -52,12 +52,23 @@ import java.util.Set;
 
 
 /**
- *      Known Bugs to work out:
- *      1. On first load, GoogleMaps takes about 2-3 seconds to load.
- *          Should investigate why it skips 47 frames...
- *      2. Save the CSV files in a folder - not directly on the SD CARD.
- *          - This should be a simple fix, call mkdir() or something.
- *          See: https://stackoverflow.com/questions/15138695/how-to-make-folder-in-sdcard-in-android
+ *
+ *  1. On first load, GoogleMaps takes about 2-3 seconds to load.
+ *     Should investigate why it skips 47 frames...
+ *
+ *  2. Save the CSV files in a folder - not directly on the SD CARD.
+ *     - This should be a simple fix, call mkdir() or something.
+ *     See: https://stackoverflow.com/questions/15138695/how-to-make-folder-in-sdcard-in-android
+ *
+ *  3. Fix loading Contacts / Previous alerts in the Google Maps activity - currently defaults
+ *     to Alerts, rather than Contacts / Previous Alerts
+ *
+ *  4. Consider supporting MMS messaging, to avoid the 160 character limit.
+ *     OR: show character count remaining in the alert
+ *     OR: allow email alerts
+ *     OR: support IM alerts via Google Hangouts / Facebook Messenger
+ *
+ *  5. 
  *
  */
 
