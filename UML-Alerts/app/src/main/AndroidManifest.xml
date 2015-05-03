@@ -37,11 +37,13 @@
         </activity>
         <activity
             android:name=".GoogleMaps"
-            android:label="@string/title_activity_maps" >
+            android:label="@string/title_activity_maps"
+            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout">
         </activity>
         <activity
             android:name=".About"
-            android:label="@string/title_activity_about" >
+            android:label="@string/title_activity_about"
+            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout">
         </activity>
 
         <service

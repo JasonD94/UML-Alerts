@@ -63,10 +63,10 @@ public class GoogleMaps extends ActionBarActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.v("onCreate()", "Starting onCreate() in GoogleMaps.java");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.google_maps);
-
-        Log.v("onCreate()", "Starting onCreate() in GoogleMaps.java");
 
         mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
@@ -82,7 +82,6 @@ public class GoogleMaps extends ActionBarActivity
 
         // Setup the alerts_map list.
         alerts_map = new ArrayList<>();
-
 
         // Try and open / read from the CSV file.
         // This will be done in the background to speed up the loading of the Google Maps View.
@@ -104,43 +103,47 @@ public class GoogleMaps extends ActionBarActivity
             gps.showSettingsAlert();
         }
 
+        // Doing a quick test for efficiency
+//        createMapView();
+//        addMarker();
+
         // Get which view we should load - could be Alerts, Contacts or Previous Alerts
-        Bundle b = getIntent().getExtras();
-        int value;
-
-        try {
-            value = b.getInt("key");
-        }
-        catch(Exception e) {
-            Log.v("onCreate()", "Failed to get Int from Bundle. (IN GOOGLEMAPS.JAVA)");
-            value = 3;      // Set default value.
-        }
-
-        // Pick which view should be set.
-        switch(value) {
-            // Loads the Alerts screen
-            case 0:
-                mNavigationDrawerFragment.selectItem(0);
-                break;
-
-            // Loads the Contacts screen
-            case 1:
-                mNavigationDrawerFragment.selectItem(1);
-                break;
-
-            // Loads the Previous Alerts screen.
-            case 2:
-                mNavigationDrawerFragment.selectItem(2);
-                break;
-
-            // on default, load Alerts view. Ex: User first opens app.
-            default:
-                // Loads the ListView up with alerts.
-                mNavigationDrawerFragment.selectItem(3);
-                createMapView();
-                addMarker();
-                break;
-        }
+//        Bundle b = getIntent().getExtras();
+//        int value;
+//
+//        try {
+//            value = b.getInt("key");
+//        }
+//        catch(Exception e) {
+//            Log.v("onCreate()", "Failed to get Int from Bundle. (IN GOOGLEMAPS.JAVA)");
+//            value = 3;      // Set default value.
+//        }
+//
+//        // Pick which view should be set.
+//        switch(value) {
+//            // Loads the Alerts screen
+//            case 0:
+//                mNavigationDrawerFragment.selectItem(0);
+//                break;
+//
+//            // Loads the Contacts screen
+//            case 1:
+//                mNavigationDrawerFragment.selectItem(1);
+//                break;
+//
+//            // Loads the Previous Alerts screen.
+//            case 2:
+//                mNavigationDrawerFragment.selectItem(2);
+//                break;
+//
+//            // on default, load Alerts view. Ex: User first opens app.
+//            default:
+//                // Loads the ListView up with alerts.
+//                mNavigationDrawerFragment.selectItem(3);
+//                createMapView();
+//                addMarker();
+//                break;
+//        }
     }
 
 
@@ -148,7 +151,7 @@ public class GoogleMaps extends ActionBarActivity
     protected void onResume() {
         super.onResume();
 
-        Log.v("onResume()", "Starting onResume() IN GoogleMaps.java");
+        Log.v("onResume()", "Starting onResume() in GoogleMaps.java");
 
         try {
             // Try and open / read from the CSV file.
@@ -167,7 +170,7 @@ public class GoogleMaps extends ActionBarActivity
     public void onPause() {
         super.onPause();  // Always call the superclass method first
 
-        Log.v(APP_TAG, "Starting onPause()...");
+        Log.v(APP_TAG, "Starting onPause()... in GoogleMaps.java");
 
         // Stop listening to the location.
         gps.stopUsingGPS();
@@ -262,23 +265,17 @@ public class GoogleMaps extends ActionBarActivity
 
 
     // Pulls data from the user's contacts book into the contacts map.
-    // This runs in a new thread, to avoid slowing down the UI.
     public void openCSV() {
         // Opening CSV file log.
         Log.v(APP_TAG, "Starting OpenCSV()...In GoogleMaps.java");
 
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    openCSVInBackGround();
-                }
-                catch(Exception e) {
-                    // Do stuff with the exception.
-                    Log.v(APP_TAG, "Couldn't openCSV file! (In GoogleMaps.java)", e);
-                }
-            }
-        }.start();
+        try {
+            openCSVInBackGround();
+        }
+        catch(Exception e) {
+            // Do stuff with the exception.
+            Log.v(APP_TAG, "Couldn't openCSV file! (In GoogleMaps.java)", e);
+        }
     }
 
 
