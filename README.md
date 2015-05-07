@@ -13,5 +13,7 @@ and at what time.
 The Android Studio project for this app can be found in the "UML-Alerts"
 directory.
 
+[A video demo of the app can be found on Youtube.](https://www.youtube.com/watch?v=5rfHz4ow6DI)
+
 This app was originally created by Jason Downing and Udit Bhansali for an
 Android Development course at UMass Lowell.
