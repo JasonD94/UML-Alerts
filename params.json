@@ -1,0 +1,6 @@
+{
+  "name": "UML-Alerts",
+  "tagline": "UML Alerts GitHub Repository",
+  "body": "# UML-Alerts\r\nUML-Alerts is a SMS based alert app. Users of the app are able to set a\r\nmessage to be sent to a list of contact(s) via SMS messaging. Location based\r\ntracking is enabled by default - anytime the app is open, it keeps track\r\nof the user's location and records it for use in sending the alert. The\r\nlocation is used in the alert - when sending the text message, a Google Maps\r\nURL is added to the bottom of the message with the user's Lat/Long coordinates.\r\nEvery alert that is sent also has its date and location recorded to the\r\ninternal memory of the user's phone, which is then displayed on a Google Maps\r\nview in the app to show the user where their previous alerts have taken place\r\nand at what time.\r\n\r\nThe Android Studio project for this app can be found in the \"UML-Alerts\"\r\ndirectory.\r\n\r\n[A video demo of the app can be found on Youtube.](https://www.youtube.com/watch?v=5rfHz4ow6DI)\r\n\r\nThis app was originally created by Jason Downing and Udit Bhansali for an\r\nAndroid Development course at UMass Lowell.\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
